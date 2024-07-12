@@ -3,8 +3,6 @@ import dateMath from '@elastic/datemath';
 import { EuiSuperDatePicker, EuiInMemoryTable } from '@elastic/eui';
 
 const QueryInsights = () => {
-
-  // Generated fake queries
   const testItems = [
     {
       "timestamp" : 1719871061174,
@@ -199,6 +197,12 @@ const QueryInsights = () => {
     }
   ];
 
+  const convertTime = (unixTime) => {
+    const date = new Date(unixTime);
+    const loc = date.toDateString().split(' ');
+    return loc[1] + ' ' + loc[2] + ', ' + loc[3] + ' @ ' + date.toLocaleTimeString('en-US');
+  };
+
   const cols = [
     {
       field: 'timestamp',
@@ -238,7 +242,7 @@ const QueryInsights = () => {
     {
       field: 'search_type',
       name: 'Search type',
-      render: (search_type) => search_type.replaceAll('_', ' '),
+      render: (searchType) => searchType.replaceAll('_', ' '),
       sortable: true,
       truncateText: true,
     },
@@ -260,20 +264,17 @@ const QueryInsights = () => {
     sort: {
       field: 'timestamp',
       direction: 'desc',
-    }
+    },
   };
 
-  const [queries, setQueries] = useState(testItems);
-
-  const convertTime = (unixTime) => {
-    const date = new Date(unixTime);
-    const loc = date.toDateString().split(' ');
-    return loc[1] + ' ' + loc[2] + ', ' + loc[3] + " @ " + date.toLocaleTimeString("en-US");
-  };
+  const retrievedQueries = testItems;
+  const [queries, setQueries] = useState(retrievedQueries);
 
   const defaultStart = 'now-24h';
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState([{ start: defaultStart, end: 'now' }]);
-  const [loading, setLoading] = useState(false);
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState([
+    { start: defaultStart, end: 'now' },
+  ]);
+  const [loading] = useState(false);
   const [currStart, setStart] = useState(defaultStart);
   const [currEnd, setEnd] = useState('now');
 
@@ -285,8 +286,12 @@ const QueryInsights = () => {
   const updateQueries = ({ start, end }) => {
     const startTimestamp = parseDateString(start);
     const endTimestamp = parseDateString(end);
-    setQueries(testItems.filter((item) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp));
-  }
+    setQueries(
+      retrievedQueries.filter(
+        (item) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
+      )
+    );
+  };
 
   const onTimeChange = ({ start, end }) => {
     const usedRange = recentlyUsedRanges.filter(
@@ -303,9 +308,13 @@ const QueryInsights = () => {
     updateQueries({ start, end });
   };
 
-  useEffect(() => {
-    onRefresh({ start: currStart, end: currEnd });
-  }, []);
+  useEffect(
+    () => {
+      onRefresh({ start: currStart, end: currEnd });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const searchTopNQueries = () => {
     return {
@@ -337,15 +346,15 @@ const QueryInsights = () => {
         search={searchTopNQueries()}
         executeQueryOptions={{
           defaultFields: [
-            "timestamp",
-            "latency",
-            "cpu",
-            "memory",
-            "indices",
-            "search_type",
-            "node_id",
-            "total_shards",
-          ]
+            'timestamp',
+            'latency',
+            'cpu',
+            'memory',
+            'indices',
+            'search_type',
+            'node_id',
+            'total_shards',
+          ],
         }}
         allowNeutralSort={false}
       />
