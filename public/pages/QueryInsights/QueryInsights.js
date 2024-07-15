@@ -267,7 +267,7 @@ const QueryInsights = () => {
     },
   };
 
-  const retrievedQueries = testItems;
+  const retrievedQueries = [];
   const [queries, setQueries] = useState(retrievedQueries);
 
   const defaultStart = 'now-24h';
@@ -315,49 +315,28 @@ const QueryInsights = () => {
     []
   );
 
-  const searchTopNQueries = () => {
-    return {
-      box: {
-        placeholder: 'Search queries',
-        schema: false,
-      },
-      toolsRight: [
-        <EuiSuperDatePicker
-          start={currStart}
-          end={currEnd}
-          recentlyUsedRanges={recentlyUsedRanges}
-          onTimeChange={onTimeChange}
-          onRefresh={onRefresh}
-          updateButtonProps={{ fill: false }}
-        />,
-      ],
-    };
-  };
-
   return (
     <div>
       <EuiInMemoryTable
         items={queries}
         columns={cols}
         sorting={sorting}
-        search={
-          {
-            box: {
-              placeholder: 'Search queries',
-              schema: false,
-            },
-            toolsRight: [
-              <EuiSuperDatePicker
-                start={currStart}
-                end={currEnd}
-                recentlyUsedRanges={recentlyUsedRanges}
-                onTimeChange={onTimeChange}
-                onRefresh={onRefresh}
-                updateButtonProps={{fill: false}}
-              />,
-            ],
-          }
-        }
+        search={{
+          box: {
+            placeholder: 'Search queries',
+            schema: false,
+          },
+          toolsRight: [
+            <EuiSuperDatePicker
+              start={currStart}
+              end={currEnd}
+              recentlyUsedRanges={recentlyUsedRanges}
+              onTimeChange={onTimeChange}
+              onRefresh={onRefresh}
+              updateButtonProps={{ fill: false }}
+            />,
+          ],
+        }}
         executeQueryOptions={{
           defaultFields: [
             'timestamp',
