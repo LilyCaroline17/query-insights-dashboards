@@ -274,7 +274,6 @@ const QueryInsights = () => {
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState([
     { start: defaultStart, end: 'now' },
   ]);
-  const [loading] = useState(false);
   const [currStart, setStart] = useState(defaultStart);
   const [currEnd, setEnd] = useState('now');
 
@@ -327,7 +326,6 @@ const QueryInsights = () => {
           start={currStart}
           end={currEnd}
           recentlyUsedRanges={recentlyUsedRanges}
-          isLoading={loading}
           onTimeChange={onTimeChange}
           onRefresh={onRefresh}
           updateButtonProps={{ fill: false }}
@@ -342,8 +340,24 @@ const QueryInsights = () => {
         items={queries}
         columns={cols}
         sorting={sorting}
-        loading={loading}
-        search={searchTopNQueries()}
+        search={
+          {
+            box: {
+              placeholder: 'Search queries',
+              schema: false,
+            },
+            toolsRight: [
+              <EuiSuperDatePicker
+                start={currStart}
+                end={currEnd}
+                recentlyUsedRanges={recentlyUsedRanges}
+                onTimeChange={onTimeChange}
+                onRefresh={onRefresh}
+                updateButtonProps={{fill: false}}
+              />,
+            ],
+          }
+        }
         executeQueryOptions={{
           defaultFields: [
             'timestamp',
