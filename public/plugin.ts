@@ -27,7 +27,7 @@ export class QueryInsightsDashboardsPlugin
         // Get start services as specified in opensearch_dashboards.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(coreStart, params);
       },
     });
 
