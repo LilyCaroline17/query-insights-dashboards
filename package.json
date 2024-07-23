@@ -7,5 +7,8 @@
     "plugin-helpers": "../../scripts/use_node ../../scripts/plugin_helpers",
     "osd": "../../scripts/use_node ../../scripts/osd",
     "lint": "node ../../scripts/eslint ."
+  },
+  "dependencies": {
+    "plotly.js-dist": "^2.34.0"
   }
 }

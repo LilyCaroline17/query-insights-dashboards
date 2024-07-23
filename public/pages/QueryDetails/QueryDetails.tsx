@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import Plotly from 'plotly.js-dist';
 import { EuiTitle, EuiFlexItem, EuiPanel, EuiText, EuiSpacer, EuiHorizontalRule, EuiFlexGrid, EuiCodeBlock, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useParams } from 'react-router-dom';
@@ -7,12 +8,19 @@ const QueryDetails = ({ queries }: { queries: any }) => {
   let { nodeId } = useParams<{ nodeId: string }>();
   const query = queries.find((q : any) => q.node_id == nodeId);
   useEffect(() => {
-    // console.log(queries.node_id + ' from props');
-    // console.log(nodeId + ' from useParams');
-    console.log("query is: " + query);
-    return () => {
-    };
-  }, []);
+    if (query) {
+      const x : number[] = Object.values(query.phase_latency_map);
+      const data = [{
+        x: x.reverse(),
+        y: ["Fetch", "Query", "Expand"],
+        type: "bar",
+        orientation: "h",
+        marker: {color: "rgba(255,0,0,0.6)"},
+        base: [x[2]+x[1], x[2], 0]
+      }];
+      Plotly.newPlot("latency", data);
+    }
+  }, [query]);
 
   const convertTime = (unixTime: number) => {
     const date = new Date(unixTime);
@@ -138,6 +146,7 @@ const QueryDetails = ({ queries }: { queries: any }) => {
                 <h2>Latency</h2>
               </EuiText>
               <EuiHorizontalRule margin="m" />
+              <div id="latency"></div>
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGrid>
