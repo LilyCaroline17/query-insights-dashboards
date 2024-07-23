@@ -3,7 +3,6 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/c
 import {
   QueryInsightsDashboardsPluginSetup,
   QueryInsightsDashboardsPluginStart,
-  AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_NAME } from '../common';
 
@@ -14,6 +13,7 @@ export class QueryInsightsDashboardsPlugin
     core.application.register({
       id: PLUGIN_NAME,
       title: 'Query Insights',
+      // @ts-ignore
       description: 'OpenSearch Dashboards Query Insights Plugin',
       category: {
         id: 'opensearch',
@@ -25,7 +25,7 @@ export class QueryInsightsDashboardsPlugin
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services as specified in opensearch_dashboards.json
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [coreStart] = await core.getStartServices();
         // Render the application
         return renderApp(coreStart, params);
       },

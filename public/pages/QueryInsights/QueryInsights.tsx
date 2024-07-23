@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import dateMath from '@elastic/datemath';
-import { EuiBasicTableColumn, EuiSuperDatePicker, EuiInMemoryTable } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { EuiBasicTableColumn, EuiSuperDatePicker, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 
-const QueryInsights = () => {
+const QueryInsights = ({setDetailQueries} : {setDetailQueries: any}) => {
   const testItems = [
     {
       "timestamp" : 1719871061174,
@@ -197,6 +198,8 @@ const QueryInsights = () => {
     }
   ];
 
+  const history = useHistory();
+
   const convertTime = (unixTime: number) => {
     const date = new Date(unixTime);
     const loc = date.toDateString().split(' ');
@@ -205,10 +208,18 @@ const QueryInsights = () => {
 
   const cols: Array<EuiBasicTableColumn<any>> = [
     {
-      field: 'timestamp',
+      // field: 'timestamp',
       name: 'Time stamp',
-      render: (timestamp: number) => convertTime(timestamp),
-      sortable: true,
+      render: (query: any) => {
+        return (
+          <span>
+          <EuiLink onClick={() => {history.push(`/query-details/${query.node_id}`); console.log(history.location)}}>
+            {convertTime(query.timestamp)}
+          </EuiLink>
+        </span>
+        );
+      },
+      sortable: (query) => query.timestamp,
       truncateText: true,
     },
     {
@@ -263,7 +274,7 @@ const QueryInsights = () => {
   const retrievedQueries: any[] = testItems;
   const [queries, setQueries] = useState(retrievedQueries);
 
-  const defaultStart = 'now-24h';
+  const defaultStart = 'now-1y';
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState([
     { start: defaultStart, end: 'now' },
   ]);
@@ -278,11 +289,11 @@ const QueryInsights = () => {
   const updateQueries = ({ start, end }: { start: string; end: string }) => {
     const startTimestamp = parseDateString(start);
     const endTimestamp = parseDateString(end);
-    setQueries(
-      retrievedQueries.filter(
-        (item) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
-      )
+    const newQueries = retrievedQueries.filter(
+      (item) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
     );
+    setQueries(newQueries);
+    setDetailQueries(newQueries);
   };
 
   const onTimeChange = ({ start, end }: { start: string; end: string }) => {
@@ -303,53 +314,52 @@ const QueryInsights = () => {
   useEffect(
     () => {
       onRefresh({ start: currStart, end: currEnd });
+      setDetailQueries(retrievedQueries);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   return (
-    <div>
-      <EuiInMemoryTable
-        items={queries}
-        columns={cols}
-        sorting={{
-          sort: {
-            field: 'timestamp',
-            direction: 'desc',
-          },
-        }}
-        search={{
-          box: {
-            placeholder: 'Search queries',
-            schema: false,
-          },
-          toolsRight: [
-            <EuiSuperDatePicker
-              start={currStart}
-              end={currEnd}
-              recentlyUsedRanges={recentlyUsedRanges}
-              onTimeChange={onTimeChange}
-              onRefresh={onRefresh}
-              updateButtonProps={{ fill: false }}
-            />,
-          ],
-        }}
-        executeQueryOptions={{
-          defaultFields: [
-            'timestamp',
-            'latency',
-            'cpu',
-            'memory',
-            'indices',
-            'search_type',
-            'node_id',
-            'total_shards',
-          ],
-        }}
-        allowNeutralSort={false}
-      />
-    </div>
+    <EuiInMemoryTable
+      items={queries}
+      columns={cols}
+      sorting={{
+        sort: {
+          field: 'Time stamp',
+          direction: 'desc',
+        },
+      }}
+      search={{
+        box: {
+          placeholder: 'Search queries',
+          schema: false,
+        },
+        toolsRight: [
+          <EuiSuperDatePicker
+            start={currStart}
+            end={currEnd}
+            recentlyUsedRanges={recentlyUsedRanges}
+            onTimeChange={onTimeChange}
+            onRefresh={onRefresh}
+            updateButtonProps={{ fill: false }}
+          />,
+        ],
+      }}
+      executeQueryOptions={{
+        defaultFields: [
+          'timestamp',
+          'latency',
+          'cpu',
+          'memory',
+          'indices',
+          'search_type',
+          'node_id',
+          'total_shards',
+        ],
+      }}
+      allowNeutralSort={false}
+    />
   );
 };
 
