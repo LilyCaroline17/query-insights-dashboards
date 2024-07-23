@@ -8,18 +8,20 @@ const QueryDetails = ({ queries }: { queries: any }) => {
   let { nodeId } = useParams<{ nodeId: string }>();
   const query = queries.find((q : any) => q.node_id == nodeId);
   useEffect(() => {
-    if (query) {
-      const x : number[] = Object.values(query.phase_latency_map);
-      const data = [{
-        x: x.reverse(),
-        y: ["Fetch", "Query", "Expand"],
-        type: "bar",
-        orientation: "h",
-        marker: {color: "rgba(255,0,0,0.6)"},
-        base: [x[2]+x[1], x[2], 0]
-      }];
-      Plotly.newPlot("latency", data);
+    let x : number[] = Object.values(query.phase_latency_map);
+    console.log(x);
+    if (x.length < 3) {
+      x = [0, 0, 0]
     }
+    const data = [{
+      x: x.reverse(),
+      y: ["Fetch", "Query", "Expand"],
+      type: "bar",
+      orientation: "h",
+      marker: {color: "rgba(255,0,0,0.6)"},
+      base: [x[2]+x[1], x[2], 0]
+    }];
+    Plotly.newPlot("latency", data);
   }, [query]);
 
   const convertTime = (unixTime: number) => {
