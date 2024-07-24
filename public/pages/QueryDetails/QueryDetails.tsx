@@ -15,13 +15,26 @@ const QueryDetails = ({ queries }: { queries: any }) => {
     }
     const data = [{
       x: x.reverse(),
-      y: ["Fetch", "Query", "Expand"],
+      y: ["Fetch    ", "Query    ", "Expand    "],
       type: "bar",
       orientation: "h",
-      marker: {color: "rgba(255,0,0,0.6)"},
-      base: [x[2]+x[1], x[2], 0]
+      width: 0.5,
+      marker: {color: ['#F990C0', '#1BA9F5', '#7DE2D1']},
+      base: [x[2]+x[1], x[2], 0],
+      text: x.map((value) => `${value}ms`),
+      textposition: "outside",
+      cliponaxis: false,
     }];
-    Plotly.newPlot("latency", data);
+    const layout = {
+      autosize: true,
+      margin: {l: 80, r: 80, t: 20, b: 20, pad: 0},
+      autorange: true,
+      height: 120,
+      xaxis: {side: "top", zeroline: false, ticksuffix: "ms", autorangeoptions: {clipmin: 0}, tickfont:{color: '#535966'}, linecolor: '#D4DAE5', gridcolor: "#D4DAE5"},
+      yaxis: {linecolor: '#D4DAE5'}
+    };
+    const config = {responsive: true};
+    Plotly.newPlot("latency", data, layout, config);
   }, [query]);
 
   const convertTime = (unixTime: number) => {
@@ -121,7 +134,7 @@ const QueryDetails = ({ queries }: { queries: any }) => {
         </EuiPanel>
         <EuiSpacer size="m"/>
         <EuiFlexGrid columns={2}>
-          <EuiFlexItem>
+          <EuiFlexItem grow={1}>
             <EuiPanel>
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                 <EuiFlexItem>
@@ -142,8 +155,8 @@ const QueryDetails = ({ queries }: { queries: any }) => {
               </EuiCodeBlock>
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel grow={false}>
+          <EuiFlexItem grow={1} style={{alignSelf: 'start'}}>
+            <EuiPanel>
               <EuiText size="xs">
                 <h2>Latency</h2>
               </EuiText>
