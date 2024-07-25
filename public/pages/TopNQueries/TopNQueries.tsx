@@ -5,11 +5,13 @@ import { FormattedMessage } from '@osd/i18n/react';
 import QueryInsights from '../QueryInsights/QueryInsights';
 import Configuration from '../Configuration/Configuration';
 import QueryDetails from "../QueryDetails/QueryDetails";
+import { CoreStart } from '../../../../../src/core/public';
 
-const TopNQueries = () => {
+const TopNQueries = ({ core }: { core: CoreStart }) => {
   const history = useHistory();
   const location = useLocation();
   const [queries, setQueries] = useState(null);
+  core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}]);
 
   const tabs: Array<{ id: string; name: string; route: string }> = [
     {
@@ -45,7 +47,7 @@ const TopNQueries = () => {
     <div style={{padding: '35px 35px'}}>
       <Switch>
         <Route exact path="/query-details/:nodeId">
-          <QueryDetails queries={queries} />
+          <QueryDetails queries={queries} core={core}/>
         </Route>
         <Route exact path="/queryInsights">
           <EuiTitle size="l">

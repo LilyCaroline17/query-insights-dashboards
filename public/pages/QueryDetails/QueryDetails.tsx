@@ -2,11 +2,22 @@ import React, { useEffect } from 'react';
 import Plotly from 'plotly.js-dist';
 import { EuiTitle, EuiFlexItem, EuiPanel, EuiText, EuiSpacer, EuiHorizontalRule, EuiFlexGrid, EuiCodeBlock, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
+import { CoreStart } from '../../../../../src/core/public';
 
-const QueryDetails = ({ queries }: { queries: any }) => {
+const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
   let { nodeId } = useParams<{ nodeId: string }>();
   const query = queries.find((q : any) => q.node_id == nodeId);
+
+  const convertTime = (unixTime: number) => {
+    const date = new Date(unixTime);
+    const loc = date.toDateString().split(' ');
+    return loc[1] + ' ' + loc[2] + ', ' + loc[3] + ' @ ' + date.toLocaleTimeString('en-US');
+  };
+
+  const history = useHistory();
+
+  core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}, { text: `Query details: ${convertTime(query.timestamp)}` }]);
   useEffect(() => {
     let x : number[] = Object.values(query.phase_latency_map);
     console.log(x);
@@ -27,7 +38,7 @@ const QueryDetails = ({ queries }: { queries: any }) => {
     }];
     const layout = {
       autosize: true,
-      margin: {l: 80, r: 80, t: 20, b: 20, pad: 0},
+      margin: {l: 80, r: 80, t: 25, b: 15, pad: 0},
       autorange: true,
       height: 120,
       xaxis: {side: "top", zeroline: false, ticksuffix: "ms", autorangeoptions: {clipmin: 0}, tickfont:{color: '#535966'}, linecolor: '#D4DAE5', gridcolor: "#D4DAE5"},
@@ -36,12 +47,6 @@ const QueryDetails = ({ queries }: { queries: any }) => {
     const config = {responsive: true};
     Plotly.newPlot("latency", data, layout, config);
   }, [query]);
-
-  const convertTime = (unixTime: number) => {
-    const date = new Date(unixTime);
-    const loc = date.toDateString().split(' ');
-    return loc[1] + ' ' + loc[2] + ', ' + loc[3] + ' @ ' + date.toLocaleTimeString('en-US');
-  };
 
   const queryString = JSON.stringify(JSON.parse(query.source).query, null, 2);
 
