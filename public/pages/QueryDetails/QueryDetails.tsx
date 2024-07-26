@@ -16,8 +16,8 @@ const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
   };
 
   const history = useHistory();
-
   core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}, { text: `Query details: ${convertTime(query.timestamp)}` }]);
+
   useEffect(() => {
     let x : number[] = Object.values(query.phase_latency_map);
     console.log(x);
