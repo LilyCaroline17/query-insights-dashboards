@@ -4,6 +4,7 @@ import { EuiTitle, EuiFlexItem, EuiPanel, EuiText, EuiSpacer, EuiHorizontalRule,
 import { FormattedMessage } from '@osd/i18n/react';
 import { useParams, useHistory } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
+import QuerySummary from './Components/QuerySummary';
 
 const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
   let { nodeId } = useParams<{ nodeId: string }>();
@@ -65,78 +66,7 @@ const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiFlexItem>
-        <EuiPanel>
-          <EuiText size="xs">
-            <h2>Summary</h2>
-          </EuiText>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGrid columns={4}>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <h4>Timestamp</h4>
-              </EuiText>
-              <EuiText size="xs">
-                {convertTime(query.timestamp)}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <h4>Latency</h4>
-              </EuiText>
-              <EuiText size="xs">
-                {`${query.latency} ms`}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <h4>CPU Usage</h4>
-              </EuiText>
-              <EuiText size="xs">
-                {`${query.cpu} ns`}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <h4>Memory</h4>
-              </EuiText>
-              <EuiText size="xs">
-                {`${query.memory} B`}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <h4>Indexes</h4>
-              </EuiText>
-              <EuiText size="xs">
-                {query.indices.toString()}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <h4>Search type</h4>
-              </EuiText>
-              <EuiText size="xs">
-                {query.search_type.replaceAll('_', ' ')}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <h4>Coordinator node ID</h4>
-              </EuiText>
-              <EuiText size="xs">
-                {query.node_id}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <h4>Total shards</h4>
-              </EuiText>
-              <EuiText size="xs">
-                {query.total_shards}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        </EuiPanel>
+        <QuerySummary query={query} />
         <EuiSpacer size="m"/>
         <EuiFlexGrid columns={2}>
           <EuiFlexItem grow={1}>

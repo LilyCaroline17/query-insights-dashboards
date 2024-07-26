@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn, EuiSuperDatePicker, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 
-const QueryInsights = ({ queries, loading, onQueriesChange } : { queries: any[], loading: boolean, onQueriesChange: any }) => {
+const QueryInsights = ({ queries, loading, onQueriesChange, defaultStart } : { queries: any[], loading: boolean, onQueriesChange: any, defaultStart: string }) => {
 
   const history = useHistory();
 
@@ -76,7 +76,6 @@ const QueryInsights = ({ queries, loading, onQueriesChange } : { queries: any[],
     },
   ];
 
-  const defaultStart = 'now-1y';
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState([
     { start: defaultStart, end: 'now' },
   ]);

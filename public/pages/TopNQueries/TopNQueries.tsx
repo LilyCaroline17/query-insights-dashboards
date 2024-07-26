@@ -12,6 +12,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   const history = useHistory();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
+  const defaultStart = 'now-1y';
   const testItems = [
     {
       "timestamp" : 1719871061174,
@@ -260,7 +261,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   }, []);
 
   useEffect(() => {
-    retrieveQueries('now-1y', 'now');
+    retrieveQueries(defaultStart, 'now');
   }, []);
 
   return (
@@ -282,7 +283,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           <div style={{padding: '25px 0px'}}>
             <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
           </div>
-          <QueryInsights queries={queries} loading={loading} onQueriesChange={handleQueriesChange} />
+          <QueryInsights queries={queries} loading={loading} onQueriesChange={handleQueriesChange} defaultStart={defaultStart} />
         </Route>
         <Route exact path="/configuration">
           <EuiTitle size="l">
