@@ -206,6 +206,9 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
       "memory": 30,
     }
   ];
+  const [topN, setTopN] = useState('10');
+  const [windowSize, setWindowSize] = useState('THIRTY');
+  const [timeUnit, setTimeUnit] = useState('MINUTES');
   const [queries, setQueries] = useState<any[]>(testItems);
 
   core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}]);
@@ -260,6 +263,12 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
     retrieveQueries(start, end);
   }, []);
 
+  const retrieveConfigInfo = async (newTopN: string, newWindowSize: string, newTimeUnit: string) => {
+    setTopN(newTopN);
+    setWindowSize(newWindowSize);
+    setTimeUnit(newTimeUnit);
+  }
+
   useEffect(() => {
     retrieveQueries(defaultStart, 'now');
   }, []);
@@ -298,7 +307,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           <div style={{padding: '25px 0px'}}>
             <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
           </div>
-          <Configuration/>
+          <Configuration currTopN={topN} currWindowSize={windowSize} currTimeUnit={timeUnit} configInfo={retrieveConfigInfo} />
         </Route>
         <Redirect to={"/queryInsights"} />
       </Switch>

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
-const Configuration = () => {
+const Configuration = ({ currTopN, currWindowSize, currTimeUnit, configInfo }: { currTopN: string, currWindowSize: string, currTimeUnit: string, configInfo: any}) => {
   const timeUnits = [
     { value: 'MINUTES', text: 'Minute(s)' },
     { value: 'HOURS', text: 'Hour(s)' },
@@ -29,15 +29,11 @@ const Configuration = () => {
     { value: 'THIRTY', text: '30' },
   ];
 
-  const defaultTopN = '10';
-  const defaultWindowSize = minutesOptions[3].value;
-  const defaultTimeUnit = timeUnits[0].value;
-
   const history = useHistory();
 
-  const [topNSize, setTopNSize] = useState(defaultTopN);
-  const [windowSize, setWindowSize] = useState(defaultWindowSize);
-  const [time, setTime] = useState(defaultTimeUnit);
+  const [topNSize, setTopNSize] = useState(currTopN);
+  const [windowSize, setWindowSize] = useState(currWindowSize);
+  const [time, setTime] = useState(currTimeUnit);
 
   const onTopNSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTopNSize(e.target.value);
@@ -76,9 +72,9 @@ const Configuration = () => {
   const WindowChoice = time === timeUnits[0].value ? MinutesBox : HoursBox;
 
   let changed;
-  if (topNSize !== defaultTopN) {
+  if (topNSize !== currTopN) {
     changed = 'topN';
-  } else if (windowSize !== defaultWindowSize) {
+  } else if (windowSize !== currWindowSize) {
     changed = 'windowSize';
   }
 
@@ -97,9 +93,9 @@ const Configuration = () => {
   }
 
   const reset = () => {
-    setTopNSize(defaultTopN);
-    setWindowSize(defaultWindowSize);
-    setTime(defaultTimeUnit);
+    setTopNSize(currTopN);
+    setWindowSize(currWindowSize);
+    setTime(currTimeUnit);
   };
 
   return (
@@ -191,7 +187,11 @@ const Configuration = () => {
                 fill
                 size="s"
                 iconType="check"
-                onClick={() => history.push('/queryInsights')}
+                onClick={() => {
+                    configInfo(topNSize, windowSize, time);
+                    return history.push('/queryInsights');
+                  }
+                }
               >
                 Save
               </EuiButton>
