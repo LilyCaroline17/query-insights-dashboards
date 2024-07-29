@@ -209,7 +209,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   const [topN, setTopN] = useState('10');
   const [windowSize, setWindowSize] = useState('THIRTY');
   const [timeUnit, setTimeUnit] = useState('MINUTES');
-  const [queries, setQueries] = useState<any[]>(testItems);
+  const [queries, setQueries] = useState<any[]>([]);
 
   core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}]);
 
@@ -243,24 +243,39 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
     </EuiTab>
   );
 
-  const parseDateString = (dateString: string) => {
-    const date = dateMath.parse(dateString);
-    return date ? date.toDate().getTime() : new Date().getTime();
-  };
+  // const parseDateString = (dateString: string) => {
+  //   const date = dateMath.parse(dateString);
+  //   return date ? date.toDate().getTime() : new Date().getTime();
+  // };
 
   const retrieveQueries = async (start: string, end: string) => {
-    setLoading(true);
-    const startTimestamp = parseDateString(start);
-    const endTimestamp = parseDateString(end);
-    const newQueries = queries.filter(
-      (item) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
-    );
-    setQueries(newQueries);
+    try {
+      setLoading(true);
+      // Make the GET request
+      const response = await fetch(`/_insights/top_queries`, {method: 'GET'});
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const newQueries = await response.json();
+      console.log('Top Queries:', newQueries);
+      setQueries(newQueries);
+    } catch (error) {
+      console.error('Error fetching top queries:', error);
+    }
     setLoading(false);
+    // const startTimestamp = parseDateString(start);
+    // const endTimestamp = parseDateString(end);
+    // const newQueries = queries.filter(
+    //   (item) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
+    // );
   }
 
   const handleQueriesChange = useCallback(({ start, end }: { start: string; end: string}) => {
-    retrieveQueries(start, end);
+    try {
+      retrieveQueries(start, end);
+    } catch (error) {
+      console.error('Error fetching top queries:', error);
+    }
   }, []);
 
   const retrieveConfigInfo = async (newTopN: string, newWindowSize: string, newTimeUnit: string) => {
