@@ -252,7 +252,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
     try {
       setLoading(true);
       // Make the GET request
-      const response = await fetch(`/_insights/top_queries`, {method: 'GET'});
+      const response = await fetch("http://localhost:9200/_insights/top_queries", {method: 'GET'});
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
