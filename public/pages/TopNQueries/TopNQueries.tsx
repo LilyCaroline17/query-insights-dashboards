@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useHistory, useLocation, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
+import React, {useCallback, useEffect, useState} from 'react';
+import {Redirect, Route, Switch, useHistory, useLocation} from 'react-router-dom';
+import {EuiTab, EuiTabs, EuiTitle} from '@elastic/eui';
 import QueryInsights from '../QueryInsights/QueryInsights';
 import Configuration from '../Configuration/Configuration';
 import QueryDetails from "../QueryDetails/QueryDetails";
-import { CoreStart } from '../../../../../src/core/public';
+import {CoreStart} from '../../../../../src/core/public';
 import dateMath from '@elastic/datemath';
+
+const QUERY_INSIGHTS = '/queryInsights';
+const CONFIGURATION = '/configuration';
 
 const TopNQueries = ({ core }: { core: CoreStart }) => {
   const history = useHistory();
@@ -209,20 +211,18 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   const [topN, setTopN] = useState('10');
   const [windowSize, setWindowSize] = useState('THIRTY');
   const [timeUnit, setTimeUnit] = useState('MINUTES');
-  const [queries, setQueries] = useState<any[]>([]);
-
-  core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}]);
+  const [queries, setQueries] = useState<any[]>(testItems);
 
   const tabs: Array<{ id: string; name: string; route: string }> = [
     {
       id: 'topNQueries',
       name: 'Top N queries',
-      route: 'queryInsights',
+      route: QUERY_INSIGHTS,
     },
     {
       id: 'configuration',
       name: 'Configuration',
-      route: 'configuration',
+      route: CONFIGURATION,
     },
   ];
 
@@ -243,40 +243,31 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
     </EuiTab>
   );
 
-  // const parseDateString = (dateString: string) => {
-  //   const date = dateMath.parse(dateString);
-  //   return date ? date.toDate().getTime() : new Date().getTime();
-  // };
+  const parseDateString = (dateString: string) => {
+    const date = dateMath.parse(dateString);
+    return date ? date.toDate().getTime() : new Date().getTime();
+  };
 
-  const retrieveQueries = async (start: string, end: string) => {
-    try {
+  const retrieveQueries = useCallback(
+    async (start: string, end: string) => {
       setLoading(true);
-      // Make the GET request
-      const response = await fetch("http://localhost:9200/_insights/top_queries", {method: 'GET'});
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      try {
+        const startTimestamp = parseDateString(start);
+        const endTimestamp = parseDateString(end);
+        setQueries((prevQueries) => {
+          // @ts-ignore
+          return testItems.filter(
+            (item) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
+          );
+        });
+      } catch (error) {
+        // console.error('Failed to retrieve queries:', error);
+      } finally {
+        setLoading(false);
       }
-      const newQueries = await response.json();
-      console.log('Top Queries:', newQueries);
-      setQueries(newQueries);
-    } catch (error) {
-      console.error('Error fetching top queries:', error);
-    }
-    setLoading(false);
-    // const startTimestamp = parseDateString(start);
-    // const endTimestamp = parseDateString(end);
-    // const newQueries = queries.filter(
-    //   (item) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
-    // );
-  }
-
-  const handleQueriesChange = useCallback(({ start, end }: { start: string; end: string}) => {
-    try {
-      retrieveQueries(start, end);
-    } catch (error) {
-      console.error('Error fetching top queries:', error);
-    }
-  }, []);
+    },
+    []
+  );
 
   const retrieveConfigInfo = async (newTopN: string, newWindowSize: string, newTimeUnit: string) => {
     setTopN(newTopN);
@@ -286,45 +277,33 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
 
   useEffect(() => {
     retrieveQueries(defaultStart, 'now');
-  }, []);
+  }, [retrieveQueries, defaultStart]);
 
   return (
     <div style={{padding: '35px 35px'}}>
       <Switch>
-        <Route exact path="/query-details/:nodeId">
+        <Route exact path="/query-details/:hashedQuery">
           <QueryDetails queries={queries} core={core}/>
         </Route>
-        <Route exact path="/queryInsights">
+        <Route exact path={QUERY_INSIGHTS}>
           <EuiTitle size="l">
-            <h1>
-              <FormattedMessage
-                id={'queryInsightsDashboards.topnqueries'}
-                defaultMessage="{name}"
-                values={{name: 'Query insights - Top N queries'}}
-              />
-            </h1>
+            <h1>Query insights - Top N queries</h1>
           </EuiTitle>
           <div style={{padding: '25px 0px'}}>
             <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
           </div>
-          <QueryInsights queries={queries} loading={loading} onQueriesChange={handleQueriesChange} defaultStart={defaultStart} />
+          <QueryInsights queries={queries} loading={loading} onQueriesChange={retrieveQueries} defaultStart={defaultStart} core={core} />
         </Route>
-        <Route exact path="/configuration">
+        <Route exact path={CONFIGURATION}>
           <EuiTitle size="l">
-            <h1>
-              <FormattedMessage
-                id={'queryInsightsDashboards.configuration'}
-                defaultMessage="{name}"
-                values={{name: 'Query insights - Configuration'}}
-              />
-            </h1>
+            <h1>Query insights - Configuration</h1>
           </EuiTitle>
           <div style={{padding: '25px 0px'}}>
             <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
           </div>
-          <Configuration currTopN={topN} currWindowSize={windowSize} currTimeUnit={timeUnit} configInfo={retrieveConfigInfo} />
+          <Configuration currTopN={topN} currWindowSize={windowSize} currTimeUnit={timeUnit} configInfo={retrieveConfigInfo} core={core} />
         </Route>
-        <Redirect to={"/queryInsights"} />
+        <Redirect to={QUERY_INSIGHTS} />
       </Switch>
     </div>
   );

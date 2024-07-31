@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlexItem,
   EuiPanel,
@@ -14,9 +14,10 @@ import {
   EuiButtonEmpty,
   EuiBottomBar,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import {CoreStart} from '../../../../../src/core/public';
 
-const Configuration = ({ currTopN, currWindowSize, currTimeUnit, configInfo }: { currTopN: string, currWindowSize: string, currTimeUnit: string, configInfo: any}) => {
+const Configuration = ({ currTopN, currWindowSize, currTimeUnit, configInfo, core }: { currTopN: string, currWindowSize: string, currTimeUnit: string, configInfo: any, core: CoreStart}) => {
   const timeUnits = [
     { value: 'MINUTES', text: 'Minute(s)' },
     { value: 'HOURS', text: 'Hour(s)' },
@@ -30,10 +31,24 @@ const Configuration = ({ currTopN, currWindowSize, currTimeUnit, configInfo }: {
   ];
 
   const history = useHistory();
+  const location = useLocation();
 
   const [topNSize, setTopNSize] = useState(currTopN);
   const [windowSize, setWindowSize] = useState(currWindowSize);
   const [time, setTime] = useState(currTimeUnit);
+
+  useEffect(() => {
+    core.chrome.setBreadcrumbs([
+      {
+        text: 'Query insights',
+        href: '/queryInsights',
+        onClick: (e) => {
+          e.preventDefault();
+          history.push('/queryInsights');
+        },
+      },
+    ]);
+  }, [core.chrome, history, location]);
 
   const onTopNSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTopNSize(e.target.value);

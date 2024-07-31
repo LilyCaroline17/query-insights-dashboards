@@ -5,7 +5,7 @@ const QuerySummary = ({query} : {query: any}) => {
   const convertTime = (unixTime: number) => {
     const date = new Date(unixTime);
     const loc = date.toDateString().split(' ');
-    return loc[1] + ' ' + loc[2] + ', ' + loc[3] + ' @ ' + date.toLocaleTimeString('en-US');
+    return `${loc[1]} ${loc[2]}, ${loc[3]} @ ${date.toLocaleTimeString('en-US')}`;
   };
   return (
     <EuiPanel>

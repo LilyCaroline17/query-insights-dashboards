@@ -2,13 +2,14 @@ import React, { useEffect } from 'react';
 import Plotly from 'plotly.js-dist';
 import { EuiTitle, EuiFlexItem, EuiPanel, EuiText, EuiSpacer, EuiHorizontalRule, EuiFlexGrid, EuiCodeBlock, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
 import QuerySummary from './Components/QuerySummary';
+// import { hashQuery } from 'src/plugins/opensearch_dashboards_utils/public';
 
 const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
-  let { nodeId } = useParams<{ nodeId: string }>();
-  const query = queries.find((q : any) => q.node_id == nodeId);
+  let { hashedQuery} = useParams<{ hashedQuery: string }>();
+  const query = queries.find((q : any) => q.node_id == hashedQuery);
 
   const convertTime = (unixTime: number) => {
     const date = new Date(unixTime);
@@ -17,11 +18,14 @@ const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
   };
 
   const history = useHistory();
-  core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}, { text: `Query details: ${convertTime(query.timestamp)}` }]);
-
+  const location = useLocation();
+  
+  useEffect(() => {
+    core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}, { text: `Query details: ${convertTime(query.timestamp)}` }]);
+  }, [history, location])
+  
   useEffect(() => {
     let x : number[] = Object.values(query.phase_latency_map);
-    console.log(x);
     if (x.length < 3) {
       x = [0, 0, 0]
     }
@@ -57,11 +61,7 @@ const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
     <div>
       <EuiTitle size="l">
         <h1>
-          <FormattedMessage
-            id={'queryInsightsDashboards.querydetails'}
-            defaultMessage="{name}"
-            values={{name: 'Query details'}}
-          />
+          Query details
         </h1>
       </EuiTitle>
       <EuiSpacer size="l" />
