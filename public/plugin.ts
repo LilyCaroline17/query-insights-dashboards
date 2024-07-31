@@ -1,9 +1,6 @@
 import { i18n } from '@osd/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import {
-  QueryInsightsDashboardsPluginSetup,
-  QueryInsightsDashboardsPluginStart,
-} from './types';
+import { QueryInsightsDashboardsPluginSetup, QueryInsightsDashboardsPluginStart } from './types';
 import { PLUGIN_NAME } from '../common';
 
 export class QueryInsightsDashboardsPlugin

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiBasicTableColumn, EuiSuperDatePicker, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
-import {CoreStart} from '../../../../../src/core/public';
+import { CoreStart } from '../../../../../src/core/public';
 
 const TIMESTAMP_FIELD = 'timestamp';
 const LATENCY_FIELD = 'latency';
@@ -13,12 +13,12 @@ const NODE_ID_FIELD = 'node_id';
 const TOTAL_SHARDS_FIELD = 'total_shards';
 
 const QueryInsights = ({
-                         queries,
-                         loading,
-                         onQueriesChange,
-                         defaultStart,
-                         core,
-                       }: {
+  queries,
+  loading,
+  onQueriesChange,
+  defaultStart,
+  core,
+}: {
   queries: any[];
   loading: boolean;
   onQueriesChange: any;

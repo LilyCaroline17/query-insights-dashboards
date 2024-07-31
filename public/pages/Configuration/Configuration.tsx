@@ -15,9 +15,21 @@ import {
   EuiBottomBar,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
-import {CoreStart} from '../../../../../src/core/public';
+import { CoreStart } from '../../../../../src/core/public';
 
-const Configuration = ({ currTopN, currWindowSize, currTimeUnit, configInfo, core }: { currTopN: string, currWindowSize: string, currTimeUnit: string, configInfo: any, core: CoreStart}) => {
+const Configuration = ({
+  currTopN,
+  currWindowSize,
+  currTimeUnit,
+  configInfo,
+  core,
+}: {
+  currTopN: string;
+  currWindowSize: string;
+  currTimeUnit: string;
+  configInfo: any;
+  core: CoreStart;
+}) => {
   const timeUnits = [
     { value: 'MINUTES', text: 'Minute(s)' },
     { value: 'HOURS', text: 'Hour(s)' },
@@ -203,10 +215,9 @@ const Configuration = ({ currTopN, currWindowSize, currTimeUnit, configInfo, cor
                 size="s"
                 iconType="check"
                 onClick={() => {
-                    configInfo(topNSize, windowSize, time);
-                    return history.push('/queryInsights');
-                  }
-                }
+                  configInfo(topNSize, windowSize, time);
+                  return history.push('/queryInsights');
+                }}
               >
                 Save
               </EuiButton>

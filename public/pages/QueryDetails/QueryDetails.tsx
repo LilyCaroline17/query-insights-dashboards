@@ -1,15 +1,26 @@
 import React, { useEffect } from 'react';
 import Plotly from 'plotly.js-dist';
-import { EuiTitle, EuiFlexItem, EuiPanel, EuiText, EuiSpacer, EuiHorizontalRule, EuiFlexGrid, EuiCodeBlock, EuiButton, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiFlexGrid,
+  EuiCodeBlock,
+  EuiButton,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
 import QuerySummary from './Components/QuerySummary';
 // import { hashQuery } from 'src/plugins/opensearch_dashboards_utils/public';
 
-const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
-  let { hashedQuery} = useParams<{ hashedQuery: string }>();
-  const query = queries.find((q : any) => q.node_id == hashedQuery);
+const QueryDetails = ({ queries, core }: { queries: any; core: CoreStart }) => {
+  const { hashedQuery } = useParams<{ hashedQuery: string }>();
+  const query = queries.find((q: any) => q.node_id === hashedQuery);
 
   const convertTime = (unixTime: number) => {
     const date = new Date(unixTime);
@@ -19,55 +30,73 @@ const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
 
   const history = useHistory();
   const location = useLocation();
-  
+
   useEffect(() => {
-    core.chrome.setBreadcrumbs([{ text: 'Query insights', href: '/queryInsights', onClick: (e) => {e.preventDefault(); history.push('/queryInsights')}}, { text: `Query details: ${convertTime(query.timestamp)}` }]);
-  }, [history, location])
-  
+    core.chrome.setBreadcrumbs([
+      {
+        text: 'Query insights',
+        href: '/queryInsights',
+        onClick: (e) => {
+          e.preventDefault();
+          history.push('/queryInsights');
+        },
+      },
+      { text: `Query details: ${convertTime(query.timestamp)}` },
+    ]);
+  }, [core.chrome, history, location, query.timestamp]);
+
   useEffect(() => {
-    let x : number[] = Object.values(query.phase_latency_map);
+    let x: number[] = Object.values(query.phase_latency_map);
     if (x.length < 3) {
-      x = [0, 0, 0]
+      x = [0, 0, 0];
     }
-    const data = [{
-      x: x.reverse(),
-      y: ["Fetch    ", "Query    ", "Expand    "],
-      type: "bar",
-      orientation: "h",
-      width: 0.5,
-      marker: {color: ['#F990C0', '#1BA9F5', '#7DE2D1']},
-      base: [x[2]+x[1], x[2], 0],
-      text: x.map((value) => `${value}ms`),
-      textposition: "outside",
-      cliponaxis: false,
-    }];
+    const data = [
+      {
+        x: x.reverse(),
+        y: ['Fetch    ', 'Query    ', 'Expand    '],
+        type: 'bar',
+        orientation: 'h',
+        width: 0.5,
+        marker: { color: ['#F990C0', '#1BA9F5', '#7DE2D1'] },
+        base: [x[2] + x[1], x[2], 0],
+        text: x.map((value) => `${value}ms`),
+        textposition: 'outside',
+        cliponaxis: false,
+      },
+    ];
     const layout = {
       autosize: true,
-      margin: {l: 80, r: 80, t: 25, b: 15, pad: 0},
+      margin: { l: 80, r: 80, t: 25, b: 15, pad: 0 },
       autorange: true,
       height: 120,
-      xaxis: {side: "top", zeroline: false, ticksuffix: "ms", autorangeoptions: {clipmin: 0}, tickfont:{color: '#535966'}, linecolor: '#D4DAE5', gridcolor: "#D4DAE5"},
-      yaxis: {linecolor: '#D4DAE5'}
+      xaxis: {
+        side: 'top',
+        zeroline: false,
+        ticksuffix: 'ms',
+        autorangeoptions: { clipmin: 0 },
+        tickfont: { color: '#535966' },
+        linecolor: '#D4DAE5',
+        gridcolor: '#D4DAE5',
+      },
+      yaxis: { linecolor: '#D4DAE5' },
     };
-    const config = {responsive: true};
-    Plotly.newPlot("latency", data, layout, config);
+    const config = { responsive: true };
+    Plotly.newPlot('latency', data, layout, config);
   }, [query]);
 
   const queryString = JSON.stringify(JSON.parse(query.source).query, null, 2);
 
-  const queryDisplay = `{\n  "query": ${queryString ? queryString.replace(/\n/g, '\n  '): ""}\n}`;
+  const queryDisplay = `{\n  "query": ${queryString ? queryString.replace(/\n/g, '\n  ') : ''}\n}`;
 
   return (
     <div>
       <EuiTitle size="l">
-        <h1>
-          Query details
-        </h1>
+        <h1>Query details</h1>
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiFlexItem>
         <QuerySummary query={query} />
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         <EuiFlexGrid columns={2}>
           <EuiFlexItem grow={1}>
             <EuiPanel>
@@ -78,25 +107,36 @@ const QueryDetails = ({ queries, core }: { queries: any, core: CoreStart }) => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconSide="right" iconType="popout" target="_blank" href="https://playground.opensearch.org/app/searchRelevance#/">
+                  <EuiButton
+                    iconSide="right"
+                    iconType="popout"
+                    target="_blank"
+                    href="https://playground.opensearch.org/app/searchRelevance#/"
+                  >
                     Open in search comparision
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiHorizontalRule margin="xs" />
-              <EuiSpacer size="xs"/>
-              <EuiCodeBlock language="jsx" paddingSize="m" fontSize="s" overflowHeight={600} isCopyable>
+              <EuiSpacer size="xs" />
+              <EuiCodeBlock
+                language="jsx"
+                paddingSize="m"
+                fontSize="s"
+                overflowHeight={600}
+                isCopyable
+              >
                 {queryDisplay}
               </EuiCodeBlock>
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow={1} style={{alignSelf: 'start'}}>
+          <EuiFlexItem grow={1} style={{ alignSelf: 'start' }}>
             <EuiPanel>
               <EuiText size="xs">
                 <h2>Latency</h2>
               </EuiText>
               <EuiHorizontalRule margin="m" />
-              <div id="latency"></div>
+              <div id="latency" />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGrid>
