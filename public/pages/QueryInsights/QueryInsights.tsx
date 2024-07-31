@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { EuiBasicTableColumn, EuiSuperDatePicker, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
+import { QUERY_INSIGHTS } from '../TopNQueries/TopNQueries';
 
 const TIMESTAMP_FIELD = 'timestamp';
 const LATENCY_FIELD = 'latency';
@@ -33,10 +34,10 @@ const QueryInsights = ({
     core.chrome.setBreadcrumbs([
       {
         text: 'Query insights',
-        href: '/queryInsights',
+        href: QUERY_INSIGHTS,
         onClick: (e) => {
           e.preventDefault();
-          history.push('/queryInsights');
+          history.push(QUERY_INSIGHTS);
         },
       },
     ]);

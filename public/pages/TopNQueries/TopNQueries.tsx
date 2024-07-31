@@ -7,8 +7,8 @@ import Configuration from '../Configuration/Configuration';
 import QueryDetails from '../QueryDetails/QueryDetails';
 import { CoreStart } from '../../../../../src/core/public';
 
-const QUERY_INSIGHTS = '/queryInsights';
-const CONFIGURATION = '/configuration';
+export const QUERY_INSIGHTS = '/queryInsights';
+export const CONFIGURATION = '/configuration';
 
 const TopNQueries = ({ core }: { core: CoreStart }) => {
   const history = useHistory();

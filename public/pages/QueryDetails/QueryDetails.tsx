@@ -15,7 +15,7 @@ import {
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
 import QuerySummary from './Components/QuerySummary';
-// import { hashQuery } from 'src/plugins/opensearch_dashboards_utils/public';
+import { QUERY_INSIGHTS } from '../TopNQueries/TopNQueries'; 
 
 const QueryDetails = ({ queries, core }: { queries: any; core: CoreStart }) => {
   const { hashedQuery } = useParams<{ hashedQuery: string }>();
@@ -35,10 +35,10 @@ const QueryDetails = ({ queries, core }: { queries: any; core: CoreStart }) => {
     core.chrome.setBreadcrumbs([
       {
         text: 'Query insights',
-        href: '/queryInsights',
+        href: QUERY_INSIGHTS,
         onClick: (e) => {
           e.preventDefault();
-          history.push('/queryInsights');
+          history.push(QUERY_INSIGHTS);
         },
       },
       { text: `Query details: ${convertTime(query.timestamp)}` },

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
+import { QUERY_INSIGHTS } from '../TopNQueries/TopNQueries';
 
 const Configuration = ({
   currTopN,
@@ -53,10 +54,10 @@ const Configuration = ({
     core.chrome.setBreadcrumbs([
       {
         text: 'Query insights',
-        href: '/queryInsights',
+        href: QUERY_INSIGHTS,
         onClick: (e) => {
           e.preventDefault();
-          history.push('/queryInsights');
+          history.push(QUERY_INSIGHTS);
         },
       },
     ]);
@@ -216,7 +217,7 @@ const Configuration = ({
                 iconType="check"
                 onClick={() => {
                   configInfo(topNSize, windowSize, time);
-                  return history.push('/queryInsights');
+                  return history.push(QUERY_INSIGHTS);
                 }}
               >
                 Save
