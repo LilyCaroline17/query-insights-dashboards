@@ -9,6 +9,7 @@
     "lint": "node ../../scripts/eslint ."
   },
   "dependencies": {
+    "object-hash": "^3.0.0",
     "plotly.js-dist": "^2.34.0"
   }
 }
