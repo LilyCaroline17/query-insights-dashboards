@@ -20,10 +20,8 @@ export function defineRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       try {
-        const client = context.core.opensearch.legacy.client.callAsCurrentUser;
-        console.log("Client:", client); // Check the client object
-        console.log("Available methods:", Object.keys(client)); // List available methods
-        const res = await client('queryInsights.getTopNQueries', request);
+        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request).callAsCurrentUser;
+        const res = await client('queryInsights.getTopNQueries');
         return response.custom({
           statusCode: 200,
           body: {
