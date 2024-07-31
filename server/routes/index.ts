@@ -13,4 +13,31 @@ export function defineRoutes(router: IRouter) {
       });
     }
   );
+  router.get(
+    {
+      path: '/api/top_queries',
+      validate: false,
+    },
+    async (context, request, response) => {
+      try {
+        const client = context.core.opensearch.legacy.client.callAsCurrentUser;
+        const res = await client('getTopNQueries', request);
+        return response.custom({
+          statusCode: 200,
+          body: {
+            ok: true,
+            response: res,
+          },
+        });
+      } catch (error) {
+        console.error("Unable to get top queries: ", error);
+        return response.ok({
+          body: {
+            ok: false,
+            response: error.message,
+          }
+        });
+      }
+    }
+  );
 }

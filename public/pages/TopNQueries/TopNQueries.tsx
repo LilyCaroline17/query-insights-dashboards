@@ -243,6 +243,8 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   const retrieveQueries = useCallback(async (start: string, end: string) => {
     setLoading(true);
     try {
+      const resp = await core.http.get('/api/top_queries');
+      console.log(resp);
       const startTimestamp = parseDateString(start);
       const endTimestamp = parseDateString(end);
       setQueries((prevQueries) => {
