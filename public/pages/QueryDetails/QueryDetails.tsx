@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
 import QuerySummary from './Components/QuerySummary';
@@ -20,7 +19,8 @@ import QuerySummary from './Components/QuerySummary';
 
 const QueryDetails = ({ queries, core }: { queries: any; core: CoreStart }) => {
   const { hashedQuery } = useParams<{ hashedQuery: string }>();
-  const query = queries.find((q: any) => q.node_id === hashedQuery);
+  const hash = require('object-hash');
+  const query = queries.find((q: any) => hash(q) === hashedQuery);
 
   const convertTime = (unixTime: number) => {
     const date = new Date(unixTime);

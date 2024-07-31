@@ -27,6 +27,7 @@ const QueryInsights = ({
 }) => {
   const history = useHistory();
   const location = useLocation();
+  const hash = require('object-hash');
 
   useEffect(() => {
     core.chrome.setBreadcrumbs([
@@ -53,7 +54,7 @@ const QueryInsights = ({
       render: (query: any) => {
         return (
           <span>
-            <EuiLink onClick={() => history.push(`/query-details/${query.node_id}`)}>
+            <EuiLink onClick={() => history.push(`/query-details/${hash(query)}`)}>
               {convertTime(query.timestamp)}
             </EuiLink>
           </span>
