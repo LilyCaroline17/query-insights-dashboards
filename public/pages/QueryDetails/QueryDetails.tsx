@@ -84,7 +84,16 @@ const QueryDetails = ({ queries, core }: { queries: any; core: CoreStart }) => {
     Plotly.newPlot('latency', data, layout, config);
   }, [query]);
 
-  const queryString = JSON.stringify(JSON.parse(query.source).query, null, 2);
+  console.log(query);
+  console.log(query.source);
+  const queryString = JSON.stringify(JSON.parse(query.source, function(k, v) {
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      return Object.assign(Object.create(null), v);
+    }
+    return v;
+  }).query, null, 2);
+
+  // const queryString = JSON.stringify(JSON.parse(query.source).query, null, 2);
 
   const queryDisplay = `{\n  "query": ${queryString ? queryString.replace(/\n/g, '\n  ') : ''}\n}`;
 

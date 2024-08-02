@@ -14,4 +14,19 @@
       },
       method: 'GET',
     });
+
+    queryInsights.setSettings = ca({
+      url: {
+        fmt: `_cluster/settings`,
+      },
+      method: 'PUT',
+      needBody: true,
+    });
+
+    queryInsights.getSettings = ca({
+      url: {
+        fmt: `_cluster/settings?include_defaults=true`,
+      },
+      method: 'GET',
+    });
   };

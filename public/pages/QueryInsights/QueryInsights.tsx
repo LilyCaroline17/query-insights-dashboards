@@ -12,7 +12,7 @@ const INDICES_FIELD = 'indices';
 const SEARCH_TYPE_FIELD = 'search_type';
 const NODE_ID_FIELD = 'node_id';
 const TOTAL_SHARDS_FIELD = 'total_shards';
-const METRIC_DEFAULT_MSG = "Not enabled",
+const METRIC_DEFAULT_MSG = "Not enabled";
 
 const QueryInsights = ({
   queries,

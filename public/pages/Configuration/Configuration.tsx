@@ -13,24 +13,32 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiBottomBar,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
-import { QUERY_INSIGHTS } from '../TopNQueries/TopNQueries';
+import { QUERY_INSIGHTS, MetricSettings } from '../TopNQueries/TopNQueries';
 
 const Configuration = ({
-  currTopN,
-  currWindowSize,
-  currTimeUnit,
+  latencySettings, 
+  cpuSettings,
+  memorySettings,
   configInfo,
   core,
 }: {
-  currTopN: string;
-  currWindowSize: string;
-  currTimeUnit: string;
-  configInfo: any;
+  latencySettings: MetricSettings, 
+  cpuSettings: MetricSettings,
+  memorySettings: MetricSettings,
+  configInfo: any
   core: CoreStart;
 }) => {
+
+  const metricTypes = [
+    { value: 'latency', text: 'Latency' },
+    { value: 'cpu', text: 'CPU' },
+    { value: 'memory', text: 'Memory' },
+  ];
+
   const timeUnits = [
     { value: 'MINUTES', text: 'Minute(s)' },
     { value: 'HOURS', text: 'Hour(s)' },
@@ -46,9 +54,29 @@ const Configuration = ({
   const history = useHistory();
   const location = useLocation();
 
-  const [topNSize, setTopNSize] = useState(currTopN);
-  const [windowSize, setWindowSize] = useState(currWindowSize);
-  const [time, setTime] = useState(currTimeUnit);
+  const [metric, setMetric] = useState<'latency' | 'cpu' | 'memory'>('latency');
+  const [isEnabled, setIsEnabled] = useState<boolean>(false);
+  const [topNSize, setTopNSize] = useState(latencySettings.currTopN);
+  const [windowSize, setWindowSize] = useState(latencySettings.currWindowSize);
+  const [time, setTime] = useState(latencySettings.currTimeUnit);
+
+  const metricSettingsMap: { [key: string]: MetricSettings } = {
+    latency: latencySettings,
+    cpu: cpuSettings,
+    memory: memorySettings,
+  };
+
+  const newOrReset = () => {
+    const currMetric = metricSettingsMap[metric];
+    setTopNSize(currMetric.currTopN);
+    setWindowSize(currMetric.currWindowSize);
+    setTime(currMetric.currTimeUnit);
+    setIsEnabled(currMetric.isEnabled);
+  };
+
+  useEffect(() => {
+    newOrReset()
+  }, [metric]);
 
   useEffect(() => {
     core.chrome.setBreadcrumbs([
@@ -62,6 +90,14 @@ const Configuration = ({
       },
     ]);
   }, [core.chrome, history, location]);
+
+  const onMetricChange = (e: any) => {
+    setMetric(e.target.value);
+  };
+
+  const onEnabledChange = (e: any) => {
+    setIsEnabled(e.target.checked);
+  };
 
   const onTopNSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTopNSize(e.target.value);
@@ -100,9 +136,12 @@ const Configuration = ({
   const WindowChoice = time === timeUnits[0].value ? MinutesBox : HoursBox;
 
   let changed;
-  if (topNSize !== currTopN) {
+  if (isEnabled != metricSettingsMap[metric].isEnabled){
+    changed = 'isEnabled';
+  }
+  else if (topNSize !== metricSettingsMap[metric].currTopN) {
     changed = 'topN';
-  } else if (windowSize !== currWindowSize) {
+  } else if (windowSize !== metricSettingsMap[metric].currWindowSize) {
     changed = 'windowSize';
   }
 
@@ -120,12 +159,6 @@ const Configuration = ({
     }
   }
 
-  const reset = () => {
-    setTopNSize(currTopN);
-    setWindowSize(currWindowSize);
-    setTime(currTimeUnit);
-  };
-
   return (
     <div>
       <EuiFlexItem grow={false} style={{ width: '60%' }}>
@@ -134,68 +167,110 @@ const Configuration = ({
             <EuiFlexItem>
               <EuiTitle size="s">
                 <EuiText size="s">
-                  <h2>Latency settings</h2>
+                  <h2>Configuration settings</h2>
                 </EuiText>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGrid columns={2} gutterSize="s" style={{ padding: '15px 0px' }}>
-                <EuiFlexItem style={{ padding: '0px 30px 0px 0px' }}>
+                <EuiFlexItem>
                   <EuiText size="xs">
-                    <h3>Value of N (count)</h3>
+                    <h3>Metric Type</h3>
                   </EuiText>
                   <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
-                    Specify the value of N. N is the number of queries to be collected within the
-                    window size.
+                    Specify the metric type to set settings for.
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFormRow
-                    label="latency.top_n_size"
-                    helpText="Max allowed limit 100."
                     style={{ padding: '0px 0px 20px' }}
                   >
-                    <EuiFlexItem>
-                      <EuiFieldNumber
-                        min={1}
-                        max={100}
-                        required={true}
-                        value={topNSize}
-                        onChange={(e) => onTopNSizeChange(e)}
-                      />
-                    </EuiFlexItem>
+                    <EuiSelect
+                      id="metricType"
+                      required={true}
+                      options={metricTypes}
+                      value={metric}
+                      onChange={(e) => onMetricChange(e)}
+                    />
                   </EuiFormRow>
                 </EuiFlexItem>
-                <EuiFlexItem style={{ padding: '0px 30px 0px 0px' }}>
+                <EuiFlexItem>
                   <EuiText size="xs">
-                    <h3>Window size</h3>
+                    <h3>Enabled</h3>
                   </EuiText>
                   <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
-                    The duration during which the Top N queries are collected.
+                    {`Enable/disable ${metric} to be include in Top N Queries.`}
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFormRow
-                    label="latency.window_size"
-                    helpText="Max allowed limit 24 hours."
-                    style={{ padding: '15px 0px 5px' }}
+                    style={{ padding: '0px 0px 20px' }}
                   >
-                    <EuiFlexGroup>
-                      <EuiFlexItem style={{ flexDirection: 'row' }}>
-                        <WindowChoice />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiSelect
-                          id="timeUnit"
-                          required={true}
-                          options={timeUnits}
-                          value={time}
-                          onChange={(e) => onTimeChange(e)}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiSwitch
+                      label=""
+                      checked={isEnabled}
+                      onChange={(e) => onEnabledChange(e)}
+                    />
                   </EuiFormRow>
                 </EuiFlexItem>
+                {isEnabled ? (
+                  <>
+                    <EuiFlexItem>
+                      <EuiText size="xs">
+                        <h3>Value of N (count)</h3>
+                      </EuiText>
+                      <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
+                        Specify the value of N. N is the number of queries to be collected within the
+                        window size.
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        label={`${metric}.top_n_size`}
+                        helpText="Max allowed limit 100."
+                        style={{ padding: '0px 0px 20px' }}
+                      >
+                        <EuiFieldNumber
+                          min={1}
+                          max={100}
+                          required={isEnabled}
+                          value={topNSize}
+                          onChange={(e) => onTopNSizeChange(e)}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="xs">
+                        <h3>Window size</h3>
+                      </EuiText>
+                      <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
+                        The duration during which the Top N queries are collected.
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        label={`${metric}.window_size`}
+                        helpText="Max allowed limit 24 hours."
+                        style={{ padding: '15px 0px 5px' }}
+                      >
+                        <EuiFlexGroup>
+                          <EuiFlexItem style={{ flexDirection: 'row' }}>
+                            <WindowChoice />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiSelect
+                              id="timeUnit"
+                              required={isEnabled}
+                              options={timeUnits}
+                              value={time}
+                              onChange={(e) => onTimeChange(e)}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </>
+                ): null}
               </EuiFlexGrid>
             </EuiFlexItem>
           </EuiForm>
@@ -205,7 +280,7 @@ const Configuration = ({
         <EuiBottomBar>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="ghost" size="s" iconType="cross" onClick={reset}>
+              <EuiButtonEmpty color="ghost" size="s" iconType="cross" onClick={newOrReset}>
                 Cancel
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -216,7 +291,7 @@ const Configuration = ({
                 size="s"
                 iconType="check"
                 onClick={() => {
-                  configInfo(topNSize, windowSize, time);
+                  configInfo(false, isEnabled, metric, topNSize, windowSize, time);
                   return history.push(QUERY_INSIGHTS);
                 }}
               >

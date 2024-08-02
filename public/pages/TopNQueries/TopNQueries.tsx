@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Redirect, Route, Switch, useHistory, useLocation } from 'react-router-dom';
+import { MemoryRouter, Redirect, Route, Switch, useHistory, useLocation } from 'react-router-dom';
 import { EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import QueryInsights from '../QueryInsights/QueryInsights';
@@ -10,14 +10,59 @@ import { CoreStart } from '../../../../../src/core/public';
 export const QUERY_INSIGHTS = '/queryInsights';
 export const CONFIGURATION = '/configuration';
 
+export interface MetricSettings {
+  isEnabled: boolean,
+  currTopN: string,
+  currWindowSize: string,
+  currTimeUnit: string,
+};
+
 const TopNQueries = ({ core }: { core: CoreStart }) => {
   const history = useHistory();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const defaultStart = 'now-1y';
-  const [topN, setTopN] = useState('10');
-  const [windowSize, setWindowSize] = useState('THIRTY');
-  const [timeUnit, setTimeUnit] = useState('MINUTES');
+  const [latencySettings, setLatencySettings] = useState<MetricSettings>({
+    isEnabled: false,
+    currTopN: '',
+    currWindowSize: '',
+    currTimeUnit: 'HOURS'
+  });
+
+  const [cpuSettings, setCpuSettings] = useState<MetricSettings>({
+    isEnabled: false,
+    currTopN: '',
+    currWindowSize: '',
+    currTimeUnit: 'HOURS'
+  });
+
+  const [memorySettings, setMemorySettings] = useState<MetricSettings>({
+    isEnabled: false,
+    currTopN: '',
+    currWindowSize: '',
+    currTimeUnit: 'HOURS'
+  });
+
+  // const metricSettingsMap: { [key: string]: MetricSettings } = {
+  //   latency: latencySettings,
+  //   cpu: cpuSettings,
+  //   memory: memorySettings,
+  // };
+
+  const setMetricSettings = (metricType: string, updates: Partial<MetricSettings>) => {
+    switch(metricType){
+      case 'latency':
+        setLatencySettings(prevSettings => ({ ...prevSettings, ...updates }));
+        break;
+      case 'cpu':
+        setCpuSettings(prevSettings => ({ ...prevSettings, ...updates }));
+        break;
+      case 'memory':
+        setMemorySettings(prevSettings => ({ ...prevSettings, ...updates }));
+        break;
+    }
+  };
+
   const [queries, setQueries] = useState<any[]>([]);
 
   const tabs: Array<{ id: string; name: string; route: string }> = [
@@ -59,11 +104,13 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
     setLoading(true);
     try {
       const resp = await core.http.get('/api/top_queries');
-      console.log(resp);
       const newQueries = resp.response.top_queries;
       const startTimestamp = parseDateString(start);
       const endTimestamp = parseDateString(end);
-      setQueries(newQueries.filter((item: any) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp));
+      const noDuplicates = newQueries.filter((array, index, self) =>
+        index === self.findIndex((t) => (t.save === array.save && t.State === array.State)))
+      console.log(noDuplicates);
+      setQueries(noDuplicates.filter((item: any) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp));
     } catch (error) {
       console.error('Failed to retrieve queries:', error);
     } finally {
@@ -72,18 +119,56 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   }, []);
 
   const retrieveConfigInfo = async (
-    newTopN: string,
-    newWindowSize: string,
-    newTimeUnit: string
+    get : boolean,
+    enabled: boolean = false,
+    metric: string = "",
+    newTopN: string = "",
+    newWindowSize: string = "",
+    newTimeUnit: string = "",
   ) => {
-    setTopN(newTopN);
-    setWindowSize(newWindowSize);
-    setTimeUnit(newTimeUnit);
+    if (get) {
+      try {
+        const resp = await core.http.get('/api/settings');
+        console.log(resp);
+        // const settings = resp.persistent.search.insights.top_queries
+        // newTopN = settings.
+        // newWindowSize = 
+        // newTimeUnit =
+      } catch (error) {
+      console.error('Failed to retrieve settings:', error);
+      }
+    } else {
+      try {
+        if (enabled){
+          setMetricSettings(metric, {
+            isEnabled: enabled,
+          });
+        } else {
+          setMetricSettings(metric, {
+            isEnabled: enabled,
+            currTopN: newTopN,
+            currWindowSize: newWindowSize,
+            currTimeUnit: newTimeUnit,
+          });
+        }
+        // const requestBody = {newTopN};
+        // core.http.put('/api/top_n_size', {body: JSON.stringify(requestBody)});
+      } catch (error) {
+        console.error('Failed to set units:', error);
+      }
+    }
+    // setTopN(newTopN);
+    // setWindowSize(newWindowSize);
+    // setTimeUnit(newTimeUnit);
   };
 
   useEffect(() => {
     retrieveQueries(defaultStart, 'now');
   }, [retrieveQueries, defaultStart]);
+
+  useEffect(() => {
+    retrieveConfigInfo(true);
+  }, [])
 
   return (
     <div style={{ padding: '35px 35px' }}>
@@ -114,9 +199,9 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
             <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
           </div>
           <Configuration
-            currTopN={topN}
-            currWindowSize={windowSize}
-            currTimeUnit={timeUnit}
+            latencySettings={latencySettings}
+            cpuSettings={cpuSettings}
+            memorySettings={memorySettings}
             configInfo={retrieveConfigInfo}
             core={core}
           />
