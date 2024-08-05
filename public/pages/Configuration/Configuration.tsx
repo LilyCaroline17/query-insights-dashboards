@@ -45,10 +45,10 @@ const Configuration = ({
   ];
 
   const minutesOptions = [
-    { value: 'ONE', text: '1' },
-    { value: 'FIVE', text: '5' },
-    { value: 'TEN', text: '10' },
-    { value: 'THIRTY', text: '30' },
+    { value: '1', text: '1' },
+    { value: '5', text: '5' },
+    { value: '10', text: '10' },
+    { value: '30', text: '30' },
   ];
 
   const history = useHistory();
@@ -135,14 +135,16 @@ const Configuration = ({
 
   const WindowChoice = time === timeUnits[0].value ? MinutesBox : HoursBox;
 
-  let changed;
+  let changed = false;
   if (isEnabled != metricSettingsMap[metric].isEnabled){
-    changed = 'isEnabled';
+    changed = true;
   }
   else if (topNSize !== metricSettingsMap[metric].currTopN) {
-    changed = 'topN';
+    changed = true;
   } else if (windowSize !== metricSettingsMap[metric].currWindowSize) {
-    changed = 'windowSize';
+    changed = true;
+  } else if (time !== metricSettingsMap[metric].currTimeUnit){
+    changed = true;
   }
 
   let valid = false;

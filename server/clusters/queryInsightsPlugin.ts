@@ -15,12 +15,25 @@
       method: 'GET',
     });
 
-    queryInsights.setSettings = ca({
+    queryInsights.getTopNQueriesLatency = ca({
       url: {
-        fmt: `_cluster/settings`,
+        fmt: `/_insights/top_queries?type=latency`,
       },
-      method: 'PUT',
-      needBody: true,
+      method: 'GET',
+    });
+
+    queryInsights.getTopNQueriesCpu = ca({
+      url: {
+        fmt: `/_insights/top_queries?type=cpu`,
+      },
+      method: 'GET',
+    });
+
+    queryInsights.getTopNQueriesMemory = ca({
+      url: {
+        fmt: `/_insights/top_queries?type=memory`,
+      },
+      method: 'GET',
     });
 
     queryInsights.getSettings = ca({
@@ -28,5 +41,13 @@
         fmt: `_cluster/settings?include_defaults=true`,
       },
       method: 'GET',
+    });
+
+    queryInsights.setSettings = ca({
+      url: {
+        fmt: `_cluster/settings`,
+      },
+      method: 'PUT',
+      needBody: true,
     });
   };
