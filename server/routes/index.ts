@@ -1,3 +1,4 @@
+import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../src/core/server';
 export function defineRoutes(router: IRouter) {
   router.get(
@@ -20,9 +21,9 @@ export function defineRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       try {
-        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request).callAsCurrentUser;
+        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request)
+          .callAsCurrentUser;
         const res = await client('queryInsights.getTopNQueries');
-        console.log(res);
         return response.custom({
           statusCode: 200,
           body: {
@@ -31,12 +32,12 @@ export function defineRoutes(router: IRouter) {
           },
         });
       } catch (error) {
-        console.error("Unable to get top queries: ", error);
+        console.error('Unable to get top queries: ', error);
         return response.ok({
           body: {
             ok: false,
             response: error.message,
-          }
+          },
         });
       }
     }
@@ -49,9 +50,9 @@ export function defineRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       try {
-        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request).callAsCurrentUser;
+        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request)
+          .callAsCurrentUser;
         const res = await client('queryInsights.getTopNQueriesLatency');
-        console.log(res);
         return response.custom({
           statusCode: 200,
           body: {
@@ -60,12 +61,12 @@ export function defineRoutes(router: IRouter) {
           },
         });
       } catch (error) {
-        console.error("Unable to get top queries (latency): ", error);
+        console.error('Unable to get top queries (latency): ', error);
         return response.ok({
           body: {
             ok: false,
             response: error.message,
-          }
+          },
         });
       }
     }
@@ -78,9 +79,9 @@ export function defineRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       try {
-        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request).callAsCurrentUser;
+        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request)
+          .callAsCurrentUser;
         const res = await client('queryInsights.getTopNQueriesCpu');
-        console.log(res);
         return response.custom({
           statusCode: 200,
           body: {
@@ -89,12 +90,12 @@ export function defineRoutes(router: IRouter) {
           },
         });
       } catch (error) {
-        console.error("Unable to get top queries (cpu): ", error);
+        console.error('Unable to get top queries (cpu): ', error);
         return response.ok({
           body: {
             ok: false,
             response: error.message,
-          }
+          },
         });
       }
     }
@@ -107,9 +108,9 @@ export function defineRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       try {
-        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request).callAsCurrentUser;
+        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request)
+          .callAsCurrentUser;
         const res = await client('queryInsights.getTopNQueriesMemory');
-        console.log(res);
         return response.custom({
           statusCode: 200,
           body: {
@@ -118,12 +119,12 @@ export function defineRoutes(router: IRouter) {
           },
         });
       } catch (error) {
-        console.error("Unable to get top queries (memory): ", error);
+        console.error('Unable to get top queries (memory): ', error);
         return response.ok({
           body: {
             ok: false,
             response: error.message,
-          }
+          },
         });
       }
     }
@@ -136,7 +137,8 @@ export function defineRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       try {
-        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request).callAsCurrentUser;
+        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request)
+          .callAsCurrentUser;
         const res = await client('queryInsights.getSettings');
         return response.custom({
           statusCode: 200,
@@ -146,12 +148,12 @@ export function defineRoutes(router: IRouter) {
           },
         });
       } catch (error) {
-        console.error("Unable to get top queries: ", error);
+        console.error('Unable to get top queries: ', error);
         return response.ok({
           body: {
             ok: false,
             response: error.message,
-          }
+          },
         });
       }
     }
@@ -160,25 +162,29 @@ export function defineRoutes(router: IRouter) {
   router.put(
     {
       path: '/api/update_settings',
-      validate: false,
+      validate: {
+        query: schema.object({
+          metric: schema.maybe(schema.string({ defaultValue: '' })),
+          enabled: schema.maybe(schema.boolean({ defaultValue: false })),
+          top_n_size: schema.maybe(schema.string({ defaultValue: '' })),
+          window_size: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
+      },
     },
     async (context, request, response) => {
       try {
-        // console.log("context is: ", context);
-        // console.log("response is: ", response);
         const query = request.query;
-        console.log("----------------request is: ", query);
-        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request).callAsCurrentUser;
+        const client = context.queryInsights_plugin.queryInsightsClient.asScoped(request)
+          .callAsCurrentUser;
         const params = {
-          "body": {
-            "persistent": {
+          body: {
+            persistent: {
               [`search.insights.top_queries.${query.metric}.enabled`]: query.enabled,
               [`search.insights.top_queries.${query.metric}.top_n_size`]: query.top_n_size,
-              [`search.insights.top_queries.${query.metric}.window_size`] : query.window_size,
-            }
-          }
+              [`search.insights.top_queries.${query.metric}.window_size`]: query.window_size,
+            },
+          },
         };
-        console.log(params);
         const res = await client('queryInsights.setSettings', params);
         return response.custom({
           statusCode: 200,
@@ -188,12 +194,12 @@ export function defineRoutes(router: IRouter) {
           },
         });
       } catch (error) {
-        console.error("Unable to set settings: ", error);
+        console.error('Unable to set settings: ', error);
         return response.ok({
           body: {
             ok: false,
             response: error.message,
-          }
+          },
         });
       }
     }

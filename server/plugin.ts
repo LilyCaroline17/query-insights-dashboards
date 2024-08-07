@@ -23,7 +23,7 @@ export class QueryInsightsDashboardsPlugin
     this.logger.debug('query-insights-dashboards: Setup');
     const router = core.http.createRouter();
     const queryInsightsClient: ILegacyCustomClusterClient = core.opensearch.legacy.createClient(
-      'opensearch_queryInsights', 
+      'opensearch_queryInsights',
       {
         plugins: [QueryInsightsPlugin],
       }
@@ -32,10 +32,9 @@ export class QueryInsightsDashboardsPlugin
     core.http.registerRouteHandlerContext('queryInsights_plugin', (_context, _request) => {
       return {
         logger: this.logger,
-        queryInsightsClient: queryInsightsClient,
+        queryInsightsClient,
       };
     });
-
 
     // Register server side APIs
     defineRoutes(router);

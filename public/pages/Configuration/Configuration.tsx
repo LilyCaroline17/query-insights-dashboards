@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import {
   EuiFlexItem,
   EuiPanel,
@@ -20,19 +20,18 @@ import { CoreStart } from '../../../../../src/core/public';
 import { QUERY_INSIGHTS, MetricSettings } from '../TopNQueries/TopNQueries';
 
 const Configuration = ({
-  latencySettings, 
+  latencySettings,
   cpuSettings,
   memorySettings,
   configInfo,
   core,
 }: {
-  latencySettings: MetricSettings, 
-  cpuSettings: MetricSettings,
-  memorySettings: MetricSettings,
-  configInfo: any
+  latencySettings: MetricSettings;
+  cpuSettings: MetricSettings;
+  memorySettings: MetricSettings;
+  configInfo: any;
   core: CoreStart;
 }) => {
-
   const metricTypes = [
     { value: 'latency', text: 'Latency' },
     { value: 'cpu', text: 'CPU' },
@@ -60,23 +59,26 @@ const Configuration = ({
   const [windowSize, setWindowSize] = useState(latencySettings.currWindowSize);
   const [time, setTime] = useState(latencySettings.currTimeUnit);
 
-  const metricSettingsMap: { [key: string]: MetricSettings } = {
-    latency: latencySettings,
-    cpu: cpuSettings,
-    memory: memorySettings,
-  };
+  const metricSettingsMap = useMemo(
+    () => ({
+      latency: latencySettings,
+      cpu: cpuSettings,
+      memory: memorySettings,
+    }),
+    [latencySettings, cpuSettings, memorySettings]
+  );
 
-  const newOrReset = () => {
+  const newOrReset = useCallback(() => {
     const currMetric = metricSettingsMap[metric];
     setTopNSize(currMetric.currTopN);
     setWindowSize(currMetric.currWindowSize);
     setTime(currMetric.currTimeUnit);
     setIsEnabled(currMetric.isEnabled);
-  };
+  }, [metric, metricSettingsMap]);
 
   useEffect(() => {
-    newOrReset()
-  }, [metric]);
+    newOrReset();
+  }, [newOrReset]);
 
   useEffect(() => {
     core.chrome.setBreadcrumbs([
@@ -136,14 +138,13 @@ const Configuration = ({
   const WindowChoice = time === timeUnits[0].value ? MinutesBox : HoursBox;
 
   let changed = false;
-  if (isEnabled != metricSettingsMap[metric].isEnabled){
+  if (isEnabled !== metricSettingsMap[metric].isEnabled) {
     changed = true;
-  }
-  else if (topNSize !== metricSettingsMap[metric].currTopN) {
+  } else if (topNSize !== metricSettingsMap[metric].currTopN) {
     changed = true;
   } else if (windowSize !== metricSettingsMap[metric].currWindowSize) {
     changed = true;
-  } else if (time !== metricSettingsMap[metric].currTimeUnit){
+  } else if (time !== metricSettingsMap[metric].currTimeUnit) {
     changed = true;
   }
 
@@ -184,9 +185,7 @@ const Configuration = ({
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow
-                    style={{ padding: '0px 0px 20px' }}
-                  >
+                  <EuiFormRow style={{ padding: '0px 0px 20px' }}>
                     <EuiSelect
                       id="metricType"
                       required={true}
@@ -205,14 +204,8 @@ const Configuration = ({
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow
-                    style={{ padding: '0px 0px 20px' }}
-                  >
-                    <EuiSwitch
-                      label=""
-                      checked={isEnabled}
-                      onChange={(e) => onEnabledChange(e)}
-                    />
+                  <EuiFormRow style={{ padding: '0px 0px 20px' }}>
+                    <EuiSwitch label="" checked={isEnabled} onChange={(e) => onEnabledChange(e)} />
                   </EuiFormRow>
                 </EuiFlexItem>
                 {isEnabled ? (
@@ -222,8 +215,8 @@ const Configuration = ({
                         <h3>Value of N (count)</h3>
                       </EuiText>
                       <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
-                        Specify the value of N. N is the number of queries to be collected within the
-                        window size.
+                        Specify the value of N. N is the number of queries to be collected within
+                        the window size.
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -272,7 +265,7 @@ const Configuration = ({
                       </EuiFormRow>
                     </EuiFlexItem>
                   </>
-                ): null}
+                ) : null}
               </EuiFlexGrid>
             </EuiFlexItem>
           </EuiForm>
