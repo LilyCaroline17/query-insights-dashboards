@@ -21,7 +21,11 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   const history = useHistory();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
-  const defaultStart = 'now-1y';
+  const [currStart, setStart] = useState('now-1y');
+  const [currEnd, setEnd] = useState('now');
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState([
+    { start: currStart, end: currEnd },
+  ]);
   const [latencySettings, setLatencySettings] = useState<MetricSettings>({
     isEnabled: false,
     currTopN: '',
@@ -99,38 +103,42 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   const retrieveQueries = useCallback(
     async (start: string, end: string) => {
       setLoading(true);
-      try {
-        const nullResponse = { response: { top_queries: [] } };
-        const respLatency = latencySettings.isEnabled
-          ? await core.http.get('/api/top_queries/latency')
-          : nullResponse;
-        const respCpu = cpuSettings.isEnabled
-          ? await core.http.get('/api/top_queries/cpu')
-          : nullResponse;
-        const respMemory = memorySettings.isEnabled
-          ? await core.http.get('/api/top_queries/memory')
-          : nullResponse;
-        const newQueries = [
-          ...respLatency.response.top_queries,
-          ...respCpu.response.top_queries,
-          ...respMemory.response.top_queries,
-        ];
-        const startTimestamp = parseDateString(start);
-        const endTimestamp = parseDateString(end);
-        const noDuplicates = newQueries.filter(
-          (array, index, self) =>
-            index === self.findIndex((t) => t.save === array.save && t.State === array.State)
-        );
-        setQueries(
-          noDuplicates.filter(
-            (item: any) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
-          )
-        );
-      } catch (error) {
-        console.error('Failed to retrieve queries:', error);
-      } finally {
-        setLoading(false);
-      }
+      const nullResponse = { response: { top_queries: [] } };
+      const params = {
+        query: {
+          from: parseDateString(start),
+          to: parseDateString(end),
+        },
+      };
+      const fetchMetric = async (endpoint : string) => {
+        try {
+          const response = await core.http.get(endpoint, params);
+          return { response: { top_queries: Array.isArray(response?.response?.top_queries) ? response.response.top_queries : [] } };
+        } catch {
+          return nullResponse;
+        }
+      };
+      const respLatency = latencySettings.isEnabled ? await fetchMetric('/api/top_queries/latency'): nullResponse;
+      const respCpu = cpuSettings.isEnabled ? await fetchMetric('/api/top_queries/cpu'): nullResponse;
+      const respMemory = memorySettings.isEnabled ? await fetchMetric('/api/top_queries/latency'): nullResponse;
+      const newQueries = [
+        ...respLatency.response.top_queries,
+        ...respCpu.response.top_queries,
+        ...respMemory.response.top_queries,
+      ];
+      // const startTimestamp = parseDateString(start);
+      // const endTimestamp = parseDateString(end);
+      const noDuplicates = newQueries.filter(
+        (array: any, index, self) =>
+          index === self.findIndex((t: any) => t.save === array.save && t.State === array.State)
+      );
+      setQueries(noDuplicates);
+      // setQueries(
+      //   noDuplicates.filter(
+      //     (item: any) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
+      //   )
+      // );
+      setLoading(false);
     },
     [latencySettings, cpuSettings, memorySettings, core]
   );
@@ -144,6 +152,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
       newWindowSize: string = '',
       newTimeUnit: string = ''
     ) => {
+      setLoading(true);
       if (get) {
         try {
           const resp = await core.http.get('/api/settings');
@@ -189,7 +198,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
             currWindowSize: newWindowSize,
             currTimeUnit: newTimeUnit,
           });
-          const resp = await core.http.put('/api/update_settings', {
+          await core.http.put('/api/update_settings', {
             query: {
               metric,
               enabled,
@@ -201,22 +210,30 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           console.error('Failed to set settings:', error);
         }
       }
+      setLoading(false);
     },
     [core]
   );
 
-  const onQueriesChange = (start: string, end: string) => {
-    retrieveQueries(start, end);
+  const onTimeChange = ({ start, end }: { start: string; end: string }) => {
+    const usedRange = recentlyUsedRanges.filter(
+      (range) => !(range.start === start && range.end === end)
+    );
+    usedRange.unshift({ start, end });
+    setStart(start);
+    setEnd(end);
+    setRecentlyUsedRanges(usedRange.length > 10 ? usedRange.slice(0, 9) : usedRange);
     retrieveConfigInfo(true);
+    retrieveQueries(start, end);
   };
 
   useEffect(() => {
-    retrieveQueries(defaultStart, 'now');
-  }, [retrieveQueries, defaultStart]);
-
-  useEffect(() => {
-    retrieveConfigInfo(true);
-  }, [retrieveConfigInfo]);
+    const asyncUpdates = async () => {
+      await retrieveConfigInfo(true);
+      await retrieveQueries(currStart, currEnd);
+    }
+    asyncUpdates();
+  }, [currStart, currEnd]);
 
   return (
     <div style={{ padding: '35px 35px' }}>
@@ -234,8 +251,10 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           <QueryInsights
             queries={queries}
             loading={loading}
-            onQueriesChange={onQueriesChange}
-            defaultStart={defaultStart}
+            onTimeChange={onTimeChange}
+            recentlyUsedRanges={recentlyUsedRanges}
+            currStart={currStart}
+            currEnd={currEnd}
             core={core}
           />
         </Route>

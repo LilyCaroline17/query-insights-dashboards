@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { EuiBasicTableColumn, EuiSuperDatePicker, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
@@ -17,14 +17,18 @@ const METRIC_DEFAULT_MSG = 'Not enabled';
 const QueryInsights = ({
   queries,
   loading,
-  onQueriesChange,
-  defaultStart,
+  onTimeChange,
+  recentlyUsedRanges,
+  currStart,
+  currEnd,
   core,
 }: {
   queries: any[];
   loading: boolean;
-  onQueriesChange: any;
-  defaultStart: string;
+  onTimeChange: any;
+  recentlyUsedRanges: any[];
+  currStart: string;
+  currEnd: string;
   core: CoreStart;
 }) => {
   const history = useHistory();
@@ -116,25 +120,8 @@ const QueryInsights = ({
     },
   ];
 
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState([
-    { start: defaultStart, end: 'now' },
-  ]);
-  const [currStart, setStart] = useState(defaultStart);
-  const [currEnd, setEnd] = useState('now');
-
-  const onTimeChange = ({ start, end }: { start: string; end: string }) => {
-    const usedRange = recentlyUsedRanges.filter(
-      (range) => !(range.start === start && range.end === end)
-    );
-    usedRange.unshift({ start, end });
-    setStart(start);
-    setEnd(end);
-    setRecentlyUsedRanges(usedRange.length > 10 ? usedRange.slice(0, 9) : usedRange);
-    onQueriesChange(start, end);
-  };
-
   const onRefresh = async ({ start, end }: { start: string; end: string }) => {
-    onQueriesChange(start, end);
+    onTimeChange({ start, end });
   };
 
   return (
@@ -157,8 +144,8 @@ const QueryInsights = ({
           <EuiSuperDatePicker
             start={currStart}
             end={currEnd}
-            recentlyUsedRanges={recentlyUsedRanges}
             onTimeChange={onTimeChange}
+            recentlyUsedRanges={recentlyUsedRanges}
             onRefresh={onRefresh}
             updateButtonProps={{ fill: false }}
           />,
