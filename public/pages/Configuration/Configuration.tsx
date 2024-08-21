@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiBottomBar,
   EuiSwitch,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
@@ -162,10 +163,13 @@ const Configuration = ({
     }
   }
 
+  const textPadding = { lineHeight: '22px', padding: '5px 0px' };
+  const formRowPadding = { padding: '0px 0px 20px' };
+
   return (
     <div>
       <EuiFlexItem grow={false} style={{ width: '60%' }}>
-        <EuiPanel style={{ padding: '20px 20px' }}>
+        <EuiPanel paddingSize='m'>
           <EuiForm>
             <EuiFlexItem>
               <EuiTitle size="s">
@@ -180,12 +184,12 @@ const Configuration = ({
                   <EuiText size="xs">
                     <h3>Metric Type</h3>
                   </EuiText>
-                  <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
+                  <EuiText size="xs" style={textPadding}>
                     Specify the metric type to set settings for.
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow style={{ padding: '0px 0px 20px' }}>
+                  <EuiFormRow style={formRowPadding}>
                     <EuiSelect
                       id="metricType"
                       required={true}
@@ -199,13 +203,16 @@ const Configuration = ({
                   <EuiText size="xs">
                     <h3>Enabled</h3>
                   </EuiText>
-                  <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
+                  <EuiText size="xs" style={textPadding}>
                     {`Enable/disable ${metric} to be include in Top N Queries.`}
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow style={{ padding: '0px 0px 20px' }}>
-                    <EuiSwitch label="" checked={isEnabled} onChange={(e) => onEnabledChange(e)} />
+                  <EuiFormRow style={formRowPadding}>
+                    <EuiFlexItem>
+                      <EuiSpacer size="s" />
+                      <EuiSwitch label="" checked={isEnabled} onChange={(e) => onEnabledChange(e)} />
+                    </EuiFlexItem>
                   </EuiFormRow>
                 </EuiFlexItem>
                 {isEnabled ? (
@@ -214,7 +221,7 @@ const Configuration = ({
                       <EuiText size="xs">
                         <h3>Value of N (count)</h3>
                       </EuiText>
-                      <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
+                      <EuiText size="xs" style={textPadding}>
                         Specify the value of N. N is the number of queries to be collected within
                         the window size.
                       </EuiText>
@@ -223,7 +230,7 @@ const Configuration = ({
                       <EuiFormRow
                         label={`${metric}.top_n_size`}
                         helpText="Max allowed limit 100."
-                        style={{ padding: '0px 0px 20px' }}
+                        style={formRowPadding}
                       >
                         <EuiFieldNumber
                           min={1}
@@ -238,7 +245,7 @@ const Configuration = ({
                       <EuiText size="xs">
                         <h3>Window size</h3>
                       </EuiText>
-                      <EuiText size="xs" style={{ lineHeight: '22px', padding: '5px 0px' }}>
+                      <EuiText size="xs" style={textPadding}>
                         The duration during which the Top N queries are collected.
                       </EuiText>
                     </EuiFlexItem>

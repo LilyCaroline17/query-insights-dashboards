@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiBasicTableColumn, EuiSuperDatePicker, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
@@ -34,6 +34,7 @@ const QueryInsights = ({
   const history = useHistory();
   const location = useLocation();
   const hash = require('object-hash');
+  const [pagination, setPagination] = useState({ pageIndex: 0});
 
   useEffect(() => {
     core.chrome.setBreadcrumbs([
@@ -56,7 +57,8 @@ const QueryInsights = ({
 
   const cols: Array<EuiBasicTableColumn<any>> = [
     {
-      name: 'Time stamp',
+      // Make into flyout instead?
+      name: 'Timestamp',
       render: (query: any) => {
         return (
           <span>
@@ -95,7 +97,7 @@ const QueryInsights = ({
     {
       field: INDICES_FIELD,
       name: 'Indices',
-      render: (indices: string[]) => indices.toString(),
+      render: (indices: string[]) => Array.from(new Set(indices.flat())).join(', '),
       sortable: true,
       truncateText: true,
     },
@@ -124,6 +126,11 @@ const QueryInsights = ({
     onTimeChange({ start, end });
   };
 
+  const filterDuplicates = (options: any[]) => options.filter((value, index, self) => 
+    index === self.findIndex((t) => (
+      t.value === value.value
+    )));
+
   return (
     <EuiInMemoryTable
       items={queries}
@@ -134,12 +141,54 @@ const QueryInsights = ({
           direction: 'desc',
         },
       }}
+      onTableChange={({ page: { index } }) =>
+        setPagination({ pageIndex: index })
+      }
+      pagination={pagination}
       loading={loading}
       search={{
         box: {
           placeholder: 'Search queries',
           schema: false,
         },
+        filters: [
+          {
+            type: 'field_value_selection',
+            field: INDICES_FIELD,
+            name: 'Indices',
+            multiSelect: true,
+            options: filterDuplicates(queries.map((query) => {
+              const values = Array.from(new Set(query[INDICES_FIELD].flat()));
+              return {
+                value: values.join(','),
+                name: values.join(','),
+                view: values.join(', ')
+              };
+            })),
+          },
+          {
+            type: 'field_value_selection',
+            field: SEARCH_TYPE_FIELD,
+            name: 'Search type',
+            multiSelect: false,
+            options: filterDuplicates(queries.map((query) => ({
+              value: query[SEARCH_TYPE_FIELD],
+              name: query[SEARCH_TYPE_FIELD],
+              view: query[SEARCH_TYPE_FIELD],
+            }))),
+          },
+          {
+            type: 'field_value_selection',
+            field: NODE_ID_FIELD,
+            name: 'Coordinator node ID',
+            multiSelect: true,
+            options: filterDuplicates(queries.map((query) => ({
+              value: query[NODE_ID_FIELD],
+              name: query[NODE_ID_FIELD],
+              view: query[NODE_ID_FIELD].replaceAll('_', ' '),
+            }))),
+          },
+        ],
         toolsRight: [
           <EuiSuperDatePicker
             start={currStart}

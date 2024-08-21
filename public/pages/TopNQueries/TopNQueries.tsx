@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Redirect, Route, Switch, useHistory, useLocation } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiTitle, EuiSpacer } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import QueryInsights from '../QueryInsights/QueryInsights';
 import Configuration from '../Configuration/Configuration';
@@ -100,9 +100,9 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
     return date ? date.toDate().getTime() : new Date().getTime();
   };
 
+  // Not guaranteed without error msg from calling a newly allowed metric
   const retrieveQueries = useCallback(
     async (start: string, end: string) => {
-      setLoading(true);
       const nullResponse = { response: { top_queries: [] } };
       const params = {
         query: {
@@ -118,27 +118,23 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           return nullResponse;
         }
       };
-      const respLatency = latencySettings.isEnabled ? await fetchMetric('/api/top_queries/latency'): nullResponse;
-      const respCpu = cpuSettings.isEnabled ? await fetchMetric('/api/top_queries/cpu'): nullResponse;
-      const respMemory = memorySettings.isEnabled ? await fetchMetric('/api/top_queries/latency'): nullResponse;
-      const newQueries = [
-        ...respLatency.response.top_queries,
-        ...respCpu.response.top_queries,
-        ...respMemory.response.top_queries,
-      ];
-      // const startTimestamp = parseDateString(start);
-      // const endTimestamp = parseDateString(end);
-      const noDuplicates = newQueries.filter(
-        (array: any, index, self) =>
-          index === self.findIndex((t: any) => t.save === array.save && t.State === array.State)
-      );
-      setQueries(noDuplicates);
-      // setQueries(
-      //   noDuplicates.filter(
-      //     (item: any) => item.timestamp >= startTimestamp && item.timestamp <= endTimestamp
-      //   )
-      // );
-      setLoading(false);
+      try {
+        setLoading(true);
+        const respLatency = latencySettings.isEnabled ? await fetchMetric('/api/top_queries/latency'): nullResponse;
+        const respCpu = cpuSettings.isEnabled ? await fetchMetric('/api/top_queries/cpu'): nullResponse;
+        const respMemory = memorySettings.isEnabled ? await fetchMetric('/api/top_queries/memory'): nullResponse;
+        const newQueries = [
+          ...respLatency.response.top_queries,
+          ...respCpu.response.top_queries,
+          ...respMemory.response.top_queries,
+        ];
+        const noDuplicates = Array.from(new Set(newQueries.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
+        setQueries(noDuplicates);
+      } catch (error) {
+        console.error('Error retrieving queries:', error);
+      } finally {
+        setLoading(false);
+      }
     },
     [latencySettings, cpuSettings, memorySettings, core]
   );
@@ -152,7 +148,6 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
       newWindowSize: string = '',
       newTimeUnit: string = ''
     ) => {
-      setLoading(true);
       if (get) {
         try {
           const resp = await core.http.get('/api/settings');
@@ -210,7 +205,6 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           console.error('Failed to set settings:', error);
         }
       }
-      setLoading(false);
     },
     [core]
   );
@@ -228,12 +222,12 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   };
 
   useEffect(() => {
-    const asyncUpdates = async () => {
-      await retrieveConfigInfo(true);
-      await retrieveQueries(currStart, currEnd);
-    }
-    asyncUpdates();
-  }, [currStart, currEnd]);
+    onTimeChange({start: currStart, end: currEnd});
+  }, []);
+
+  useEffect(() => {
+    retrieveQueries(currStart, currEnd);
+  }, [latencySettings, cpuSettings, memorySettings]);
 
   return (
     <div style={{ padding: '35px 35px' }}>
@@ -245,9 +239,9 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           <EuiTitle size="l">
             <h1>Query insights - Top N queries</h1>
           </EuiTitle>
-          <div style={{ padding: '25px 0px' }}>
-            <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
-          </div>
+          <EuiSpacer size="l" />
+          <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
+          <EuiSpacer size="l" />
           <QueryInsights
             queries={queries}
             loading={loading}
@@ -262,9 +256,9 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           <EuiTitle size="l">
             <h1>Query insights - Configuration</h1>
           </EuiTitle>
-          <div style={{ padding: '25px 0px' }}>
-            <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
-          </div>
+          <EuiSpacer size="l" />
+          <EuiTabs>{tabs.map(renderTab)}</EuiTabs>
+          <EuiSpacer size="l" />
           <Configuration
             latencySettings={latencySettings}
             cpuSettings={cpuSettings}
