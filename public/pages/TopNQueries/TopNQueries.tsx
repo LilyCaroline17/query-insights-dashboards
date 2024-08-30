@@ -21,7 +21,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   const history = useHistory();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
-  const [currStart, setStart] = useState('now-1y');
+  const [currStart, setStart] = useState('now-1d');
   const [currEnd, setEnd] = useState('now');
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState([
     { start: currStart, end: currEnd },
@@ -100,14 +100,13 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
     return date ? date.toDate().getTime() : new Date().getTime();
   };
 
-  // Not guaranteed without error msg from calling a newly allowed metric
   const retrieveQueries = useCallback(
     async (start: string, end: string) => {
       const nullResponse = { response: { top_queries: [] } };
       const params = {
         query: {
-          from: parseDateString(start),
-          to: parseDateString(end),
+          from: new Date(parseDateString(start)).toISOString(),
+          to: new Date(parseDateString(end)).toISOString(),
         },
       };
       const fetchMetric = async (endpoint : string) => {

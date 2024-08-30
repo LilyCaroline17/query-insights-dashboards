@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { EuiBasicTableColumn, EuiSuperDatePicker, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiInMemoryTable, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
 import { QUERY_INSIGHTS } from '../TopNQueries/TopNQueries';
@@ -126,7 +126,7 @@ const QueryInsights = ({
     onTimeChange({ start, end });
   };
 
-  const filterDuplicates = (options: any[]) => options.filter((value, index, self) => 
+  const filterDuplicates = (options: any[]) => options.filter((value, index, self) =>
     index === self.findIndex((t) => (
       t.value === value.value
     )));

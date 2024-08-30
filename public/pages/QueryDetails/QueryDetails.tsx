@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import Plotly from 'plotly.js-dist';
 import {
-  EuiTitle,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiFlexGrid,
-  EuiCodeBlock,
   EuiButton,
+  EuiCodeBlock,
+  EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle
 } from '@elastic/eui';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { EuiFlexItem, EuiPanel, EuiText, EuiHorizontalRule, EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 
 const QuerySummary = ({ query }: { query: any }) => {
   const convertTime = (unixTime: number) => {
