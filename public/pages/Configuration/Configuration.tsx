@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
@@ -173,7 +173,7 @@ const Configuration = ({
     <div>
       <EuiFlexGroup>
         <EuiFlexItem grow={6}>
-          <EuiPanel paddingSize='m'>
+          <EuiPanel paddingSize="m">
             <EuiForm>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -215,7 +215,11 @@ const Configuration = ({
                     <EuiFormRow style={formRowPadding}>
                       <EuiFlexItem>
                         <EuiSpacer size="s" />
-                        <EuiSwitch label="" checked={isEnabled} onChange={(e) => onEnabledChange(e)} />
+                        <EuiSwitch
+                          label=""
+                          checked={isEnabled}
+                          onChange={(e) => onEnabledChange(e)}
+                        />
                       </EuiFlexItem>
                     </EuiFormRow>
                   </EuiFlexItem>
@@ -283,7 +287,7 @@ const Configuration = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel paddingSize='m' grow={false}>
+          <EuiPanel paddingSize="m" grow={false}>
             <EuiFlexItem>
               <EuiTitle size="s">
                 <EuiText size="s">
@@ -322,7 +326,7 @@ const Configuration = ({
             </EuiFlexItem>
           </EuiPanel>
         </EuiFlexItem>
-       </EuiFlexGroup>
+      </EuiFlexGroup>
       {changed && valid ? (
         <EuiBottomBar>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { EuiBasicTableColumn, EuiInMemoryTable, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
+import hash from 'object-hash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
 import { QUERY_INSIGHTS } from '../TopNQueries/TopNQueries';
@@ -33,8 +34,7 @@ const QueryInsights = ({
 }) => {
   const history = useHistory();
   const location = useLocation();
-  const hash = require('object-hash');
-  const [pagination, setPagination] = useState({ pageIndex: 0});
+  const [pagination, setPagination] = useState({ pageIndex: 0 });
 
   useEffect(() => {
     core.chrome.setBreadcrumbs([
@@ -126,10 +126,10 @@ const QueryInsights = ({
     onTimeChange({ start, end });
   };
 
-  const filterDuplicates = (options: any[]) => options.filter((value, index, self) =>
-    index === self.findIndex((t) => (
-      t.value === value.value
-    )));
+  const filterDuplicates = (options: any[]) =>
+    options.filter(
+      (value, index, self) => index === self.findIndex((t) => t.value === value.value)
+    );
 
   return (
     <EuiInMemoryTable
@@ -141,9 +141,7 @@ const QueryInsights = ({
           direction: 'desc',
         },
       }}
-      onTableChange={({ page: { index } }) =>
-        setPagination({ pageIndex: index })
-      }
+      onTableChange={({ page: { index } }) => setPagination({ pageIndex: index })}
       pagination={pagination}
       loading={loading}
       search={{
@@ -157,36 +155,42 @@ const QueryInsights = ({
             field: INDICES_FIELD,
             name: 'Indices',
             multiSelect: true,
-            options: filterDuplicates(queries.map((query) => {
-              const values = Array.from(new Set(query[INDICES_FIELD].flat()));
-              return {
-                value: values.join(','),
-                name: values.join(','),
-                view: values.join(', ')
-              };
-            })),
+            options: filterDuplicates(
+              queries.map((query) => {
+                const values = Array.from(new Set(query[INDICES_FIELD].flat()));
+                return {
+                  value: values.join(','),
+                  name: values.join(','),
+                  view: values.join(', '),
+                };
+              })
+            ),
           },
           {
             type: 'field_value_selection',
             field: SEARCH_TYPE_FIELD,
             name: 'Search type',
             multiSelect: false,
-            options: filterDuplicates(queries.map((query) => ({
-              value: query[SEARCH_TYPE_FIELD],
-              name: query[SEARCH_TYPE_FIELD],
-              view: query[SEARCH_TYPE_FIELD],
-            }))),
+            options: filterDuplicates(
+              queries.map((query) => ({
+                value: query[SEARCH_TYPE_FIELD],
+                name: query[SEARCH_TYPE_FIELD],
+                view: query[SEARCH_TYPE_FIELD],
+              }))
+            ),
           },
           {
             type: 'field_value_selection',
             field: NODE_ID_FIELD,
             name: 'Coordinator node ID',
             multiSelect: true,
-            options: filterDuplicates(queries.map((query) => ({
-              value: query[NODE_ID_FIELD],
-              name: query[NODE_ID_FIELD],
-              view: query[NODE_ID_FIELD].replaceAll('_', ' '),
-            }))),
+            options: filterDuplicates(
+              queries.map((query) => ({
+                value: query[NODE_ID_FIELD],
+                name: query[NODE_ID_FIELD],
+                view: query[NODE_ID_FIELD].replaceAll('_', ' '),
+              }))
+            ),
           },
         ],
         toolsRight: [

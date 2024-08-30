@@ -58,8 +58,6 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
       case 'memory':
         setMemorySettings((prevSettings) => ({ ...prevSettings, ...updates }));
         break;
-      default:
-        console.error(`Unknown metric type: ${metricType}`);
     }
   };
 
@@ -109,27 +107,42 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
           to: new Date(parseDateString(end)).toISOString(),
         },
       };
-      const fetchMetric = async (endpoint : string) => {
+      const fetchMetric = async (endpoint: string) => {
         try {
           const response = await core.http.get(endpoint, params);
-          return { response: { top_queries: Array.isArray(response?.response?.top_queries) ? response.response.top_queries : [] } };
+          return {
+            response: {
+              top_queries: Array.isArray(response?.response?.top_queries)
+                ? response.response.top_queries
+                : [],
+            },
+          };
         } catch {
           return nullResponse;
         }
       };
       try {
         setLoading(true);
-        const respLatency = latencySettings.isEnabled ? await fetchMetric('/api/top_queries/latency'): nullResponse;
-        const respCpu = cpuSettings.isEnabled ? await fetchMetric('/api/top_queries/cpu'): nullResponse;
-        const respMemory = memorySettings.isEnabled ? await fetchMetric('/api/top_queries/memory'): nullResponse;
+        const respLatency = latencySettings.isEnabled
+          ? await fetchMetric('/api/top_queries/latency')
+          : nullResponse;
+        const respCpu = cpuSettings.isEnabled
+          ? await fetchMetric('/api/top_queries/cpu')
+          : nullResponse;
+        const respMemory = memorySettings.isEnabled
+          ? await fetchMetric('/api/top_queries/memory')
+          : nullResponse;
         const newQueries = [
           ...respLatency.response.top_queries,
           ...respCpu.response.top_queries,
           ...respMemory.response.top_queries,
         ];
-        const noDuplicates = Array.from(new Set(newQueries.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
+        const noDuplicates = Array.from(
+          new Set(newQueries.map((item) => JSON.stringify(item)))
+        ).map((item) => JSON.parse(item));
         setQueries(noDuplicates);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Error retrieving queries:', error);
       } finally {
         setLoading(false);
@@ -182,6 +195,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
             });
           }
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Failed to retrieve settings:', error);
         }
       } else {
@@ -201,6 +215,7 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
             },
           });
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Failed to set settings:', error);
         }
       }
@@ -221,12 +236,13 @@ const TopNQueries = ({ core }: { core: CoreStart }) => {
   };
 
   useEffect(() => {
-    onTimeChange({start: currStart, end: currEnd});
-  }, []);
+    onTimeChange({ start: currStart, end: currEnd });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currStart, currEnd]);
 
   useEffect(() => {
     retrieveQueries(currStart, currEnd);
-  }, [latencySettings, cpuSettings, memorySettings]);
+  }, [latencySettings, cpuSettings, memorySettings, currStart, currEnd, retrieveQueries]);
 
   return (
     <div style={{ padding: '35px 35px' }}>

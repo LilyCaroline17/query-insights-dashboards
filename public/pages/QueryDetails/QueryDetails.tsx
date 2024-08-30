@@ -10,8 +10,9 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
+import hash from 'object-hash';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { CoreStart } from '../../../../../src/core/public';
 import QuerySummary from './Components/QuerySummary';
@@ -19,7 +20,6 @@ import { QUERY_INSIGHTS } from '../TopNQueries/TopNQueries';
 
 const QueryDetails = ({ queries, core }: { queries: any; core: CoreStart }) => {
   const { hashedQuery } = useParams<{ hashedQuery: string }>();
-  const hash = require('object-hash');
   const query = queries.find((q: any) => hash(q) === hashedQuery);
 
   const convertTime = (unixTime: number) => {
