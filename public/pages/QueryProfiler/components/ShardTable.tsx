@@ -55,20 +55,23 @@ export const ShardTable: React.FC<ShardTableProps> = ({
 
     return shards.map((shard, index) => {
       // Calculate search execution time
-      const searchTime = shard.searches?.[0]?.query?.reduce((sum, q) => {
-        return sum + (q.time_in_nanos || 0);
-      }, 0) || 0;
+      const searchTime =
+        shard.searches?.[0]?.query?.reduce((sum, q) => {
+          return sum + (q.time_in_nanos || 0);
+        }, 0) || 0;
 
       const rewriteTime = shard.searches?.[0]?.rewrite_time || 0;
-      const collectorsTime = shard.searches?.[0]?.collector?.reduce(
-        (sum, collector) => sum + (collector.time_in_nanos || 0),
-        0
-      ) || 0;
+      const collectorsTime =
+        shard.searches?.[0]?.collector?.reduce(
+          (sum, collector) => sum + (collector.time_in_nanos || 0),
+          0
+        ) || 0;
 
       // Calculate aggregation time
-      const aggTime = shard.aggregations?.reduce((sum, agg) => {
-        return sum + (agg.time_in_nanos || 0);
-      }, 0) || 0;
+      const aggTime =
+        shard.aggregations?.reduce((sum, agg) => {
+          return sum + (agg.time_in_nanos || 0);
+        }, 0) || 0;
 
       // Keep the full shard ID for display
       const shardId = shard.id || `shard-${index}`;
@@ -96,14 +99,12 @@ export const ShardTable: React.FC<ShardTableProps> = ({
     return [...filteredShards].sort((a, b) => {
       if (sortField === 'name') {
         // String comparison for shard names
-        return sortDirection === 'asc' 
+        return sortDirection === 'asc'
           ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name);
       } else {
         // Numeric comparison for times
-        return sortDirection === 'desc'
-          ? b[sortField] - a[sortField]
-          : a[sortField] - b[sortField];
+        return sortDirection === 'desc' ? b[sortField] - a[sortField] : a[sortField] - b[sortField];
       }
     });
   }, [filteredShards, sortField, sortDirection]);
@@ -122,13 +123,14 @@ export const ShardTable: React.FC<ShardTableProps> = ({
     {
       field: 'name',
       name: (
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '6px', 
-          cursor: 'pointer',
-          userSelect: 'none'
-        }}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
           onClick={() => {
             if (sortField === 'name') {
               setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -137,24 +139,34 @@ export const ShardTable: React.FC<ShardTableProps> = ({
               setSortDirection('asc');
             }
           }}
-          title={sortField === 'name' 
-            ? `Currently sorted ${sortDirection === 'asc' ? 'A-Z' : 'Z-A'}. Click to sort ${sortDirection === 'asc' ? 'Z-A' : 'A-Z'}.`
-            : 'Click to sort by shard name'}
+          title={
+            sortField === 'name'
+              ? `Currently sorted ${sortDirection === 'asc' ? 'A-Z' : 'Z-A'}. Click to sort ${
+                  sortDirection === 'asc' ? 'Z-A' : 'A-Z'
+                }.`
+              : 'Click to sort by shard name'
+          }
         >
           <span>Shard</span>
-          <span style={{ 
-            fontSize: '14px', 
-            fontWeight: 'bold',
-            color: '#98A2B3',
-            transition: 'color 0.2s'
-          }}>
+          <span
+            style={{
+              fontSize: '14px',
+              fontWeight: 'bold',
+              color: '#98A2B3',
+              transition: 'color 0.2s',
+            }}
+          >
             ⇅
           </span>
         </div>
       ),
       width: '35%',
       render: (name: string, item: ShardMetrics) => (
-        <EuiLink onClick={() => onShardSelect(item.index)} color="primary" style={{ fontWeight: 'normal', fontSize: '13px' }}>
+        <EuiLink
+          onClick={() => onShardSelect(item.index)}
+          color="primary"
+          style={{ fontWeight: 'normal', fontSize: '13px' }}
+        >
           {name}
         </EuiLink>
       ),
@@ -187,7 +199,9 @@ export const ShardTable: React.FC<ShardTableProps> = ({
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ minWidth: '45px' }}>
-            <span style={{ fontSize: '12px', color: PROFILER_COLORS.SUBDUED_TEXT }}>{time.toFixed(0)} ms</span>
+            <span style={{ fontSize: '12px', color: PROFILER_COLORS.SUBDUED_TEXT }}>
+              {time.toFixed(0)} ms
+            </span>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -220,7 +234,9 @@ export const ShardTable: React.FC<ShardTableProps> = ({
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ minWidth: '45px' }}>
-            <span style={{ fontSize: '12px', color: PROFILER_COLORS.SUBDUED_TEXT }}>{time.toFixed(0)} ms</span>
+            <span style={{ fontSize: '12px', color: PROFILER_COLORS.SUBDUED_TEXT }}>
+              {time.toFixed(0)} ms
+            </span>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -244,7 +260,12 @@ export const ShardTable: React.FC<ShardTableProps> = ({
       iconSide="right"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
     >
-      Sort by: {sortField === 'searchTime' ? 'Search time' : sortField === 'aggTime' ? 'Aggregation time' : 'Search time'}
+      Sort by:{' '}
+      {sortField === 'searchTime'
+        ? 'Search time'
+        : sortField === 'aggTime'
+        ? 'Aggregation time'
+        : 'Search time'}
     </EuiButtonEmpty>
   );
 
@@ -313,22 +334,40 @@ export const ShardTable: React.FC<ShardTableProps> = ({
       <EuiSpacer size="s" />
 
       {/* Color threshold legend */}
-      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" role="group" aria-label="Color threshold legend">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="flexEnd"
+        role="group"
+        aria-label="Color threshold legend"
+      >
         {[
-          { color: PROFILER_COLORS.GREEN, label: `≤${orangeThreshold}% (Low)`, ariaLabel: 'low usage' },
-          { color: PROFILER_COLORS.ORANGE, label: `${orangeThreshold + 1}%-${redThreshold}% (Medium)`, ariaLabel: 'medium usage' },
-          { color: PROFILER_COLORS.RED, label: `>${redThreshold}% (High)`, ariaLabel: 'high usage' },
+          {
+            color: PROFILER_COLORS.GREEN,
+            label: `≤${orangeThreshold}% (Low)`,
+            ariaLabel: 'low usage',
+          },
+          {
+            color: PROFILER_COLORS.ORANGE,
+            label: `${orangeThreshold + 1}%-${redThreshold}% (Medium)`,
+            ariaLabel: 'medium usage',
+          },
+          {
+            color: PROFILER_COLORS.RED,
+            label: `>${redThreshold}% (High)`,
+            ariaLabel: 'high usage',
+          },
         ].map(({ color, label, ariaLabel }) => (
           <EuiFlexItem key={color} grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <div 
-                  style={{ 
-                    width: '12px', 
-                    height: '12px', 
-                    backgroundColor: color, 
-                    borderRadius: '2px' 
-                  }} 
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: color,
+                    borderRadius: '2px',
+                  }}
                   role="img"
                   aria-label={`${color} indicator for ${ariaLabel}`}
                 />

@@ -26,10 +26,7 @@ import { DEFAULT_THRESHOLDS } from '../constants';
 /**
  * Main dashboard component with dual editors and visualization
  */
-export const ProfilerDashboard: React.FC<ProfilerDashboardProps> = ({
-  data,
-  updateData,
-}) => {
+export const ProfilerDashboard: React.FC<ProfilerDashboardProps> = ({ data, updateData }) => {
   // Query input is reserved for future query execution feature
   // Currently only used for display purposes in dual-editor mode
   const [queryInput, setQueryInput] = useState<string>('');
@@ -39,10 +36,10 @@ export const ProfilerDashboard: React.FC<ProfilerDashboardProps> = ({
   const [error, setError] = useState<ProfilerError | null>(null);
   const [inputMode, setInputMode] = useState<InputMode>('enterQuery');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  
+
   // Settings state
   const [showEditors, setShowEditors] = useState(true);
-  
+
   // Shared threshold state for color coding
   const [redThreshold, setRedThreshold] = useState(DEFAULT_THRESHOLDS.RED);
   const [orangeThreshold, setOrangeThreshold] = useState(DEFAULT_THRESHOLDS.ORANGE);
@@ -73,7 +70,7 @@ export const ProfilerDashboard: React.FC<ProfilerDashboardProps> = ({
     }
 
     const result = parseProfileJSON(jsonInput);
-    
+
     if (!result.success || !result.data) {
       setError(result.error!);
       return;
@@ -106,7 +103,7 @@ export const ProfilerDashboard: React.FC<ProfilerDashboardProps> = ({
     }
 
     const file = files[0];
-    
+
     // Validate file type
     const fileValidation = validateFileType(file);
     if (!fileValidation.isValid) {
@@ -116,7 +113,7 @@ export const ProfilerDashboard: React.FC<ProfilerDashboardProps> = ({
 
     // Parse the file
     const result = await parseProfileFile(file);
-    
+
     if (!result.success) {
       setError(result.error!);
       return;
@@ -223,7 +220,11 @@ export const ProfilerDashboard: React.FC<ProfilerDashboardProps> = ({
       {/* Dual text editors - collapsible */}
       {showEditors && (
         <>
-          <EuiPanel paddingSize="none" hasBorder style={{ borderRadius: '6px', overflow: 'hidden' }}>
+          <EuiPanel
+            paddingSize="none"
+            hasBorder
+            style={{ borderRadius: '6px', overflow: 'hidden' }}
+          >
             <QueryEditor
               queryInput={queryInput}
               jsonInput={jsonInput}

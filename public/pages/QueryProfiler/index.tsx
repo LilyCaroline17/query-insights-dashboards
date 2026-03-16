@@ -1,4 +1,9 @@
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -40,18 +45,15 @@ const QueryProfilerApp: React.FC = () => {
 /**
  * Mount function for the Query Profiler Dev Tools tab.
  * This function is called when the Query Profiler tab is activated.
- * 
+ *
  * @param params - Mount parameters including element, core services, and dataSourceId
  * @returns Unmount function to clean up resources
  */
-export const renderQueryProfiler = ({
-  element,
-  core,
-}: QueryProfilerMountParams) => {
+export const renderQueryProfiler = ({ element, core }: QueryProfilerMountParams) => {
   const I18nContext = core.i18n.Context;
 
   const root = createRoot(element);
-  
+
   root.render(
     <I18nContext>
       <QueryProfilerApp />

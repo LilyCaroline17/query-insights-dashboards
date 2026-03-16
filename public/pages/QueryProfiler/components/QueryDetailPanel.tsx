@@ -21,7 +21,7 @@ import { PROFILER_COLORS, DEFAULT_THRESHOLDS, getBarColor, LAYOUT_CONSTANTS } fr
 /**
  * Component for displaying detailed query information including timing breakdown
  */
-export const QueryDetailPanel: React.FC<QueryDetailProps> = ({ 
+export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
   query,
   redThreshold = DEFAULT_THRESHOLDS.RED,
   orangeThreshold = DEFAULT_THRESHOLDS.ORANGE,
@@ -81,46 +81,56 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
     const isExpanded = expandedHierarchyNodes[nodeId] === true;
 
     const toggleNode = () => {
-      setExpandedHierarchyNodes(prev => ({
+      setExpandedHierarchyNodes((prev) => ({
         ...prev,
-        [nodeId]: !prev[nodeId]
+        [nodeId]: !prev[nodeId],
       }));
     };
 
     return (
       <div key={nodeId}>
-        <div style={{
-          marginBottom: '8px',
-          marginLeft: `${depth * LAYOUT_CONSTANTS.TREE_HIERARCHY_INDENT}px`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '6px 8px',
-          backgroundColor: depth === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.5)',
-          borderRadius: '4px',
-          cursor: hasChildren ? 'pointer' : 'default'
-        }}
-        onClick={hasChildren ? toggleNode : undefined}
-        onKeyDown={hasChildren ? (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggleNode();
+        <div
+          style={{
+            marginBottom: '8px',
+            marginLeft: `${depth * LAYOUT_CONSTANTS.TREE_HIERARCHY_INDENT}px`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 8px',
+            backgroundColor: depth === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.5)',
+            borderRadius: '4px',
+            cursor: hasChildren ? 'pointer' : 'default',
+          }}
+          onClick={hasChildren ? toggleNode : undefined}
+          onKeyDown={
+            hasChildren
+              ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleNode();
+                  }
+                }
+              : undefined
           }
-        } : undefined}
-        role={hasChildren ? 'button' : undefined}
-        tabIndex={hasChildren ? 0 : undefined}
-        aria-expanded={hasChildren ? isExpanded : undefined}
-        aria-label={hasChildren ? `${isExpanded ? 'Collapse' : 'Expand'} ${node.type || 'query'}` : undefined}
+          role={hasChildren ? 'button' : undefined}
+          tabIndex={hasChildren ? 0 : undefined}
+          aria-expanded={hasChildren ? isExpanded : undefined}
+          aria-label={
+            hasChildren
+              ? `${isExpanded ? 'Collapse' : 'Expand'} ${node.type || 'query'}`
+              : undefined
+          }
         >
           {/* Expand/collapse arrow only for nodes with children */}
           {hasChildren ? (
-            <span style={{
-              width: '16px',
-              fontSize: '10px',
-              color: '#69707D',
-              flexShrink: 0
-            }}
-            aria-hidden="true"
+            <span
+              style={{
+                width: '16px',
+                fontSize: '10px',
+                color: '#69707D',
+                flexShrink: 0,
+              }}
+              aria-hidden="true"
             >
               {isExpanded ? '▼' : '▸'}
             </span>
@@ -135,14 +145,18 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
             </EuiText>
             {/* Show description in smaller, subdued text if it's different from type */}
             {node.description && node.description !== node.type && (
-              <EuiText size="xs" color="subdued" style={{
-                fontFamily: 'monospace',
-                marginTop: '2px',
-                wordBreak: 'break-all',
-                maxWidth: '600px',
-                lineHeight: '1.3',
-                fontSize: '11px'
-              }}>
+              <EuiText
+                size="xs"
+                color="subdued"
+                style={{
+                  fontFamily: 'monospace',
+                  marginTop: '2px',
+                  wordBreak: 'break-all',
+                  maxWidth: '600px',
+                  lineHeight: '1.3',
+                  fontSize: '11px',
+                }}
+              >
                 {node.description.length > 100
                   ? `${node.description.substring(0, 100)}...`
                   : node.description}
@@ -157,14 +171,17 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
         </div>
 
         {/* Recursively render children only if expanded */}
-        {hasChildren && isExpanded && node.children.map((child: any, index: number) => {
-          const childNodeId = `${nodeId}-${index}`;
-          const childPercentage = child.percentage ||
-            (child.time_in_nanos && query?.time_in_nanos
-              ? (child.time_in_nanos / query.time_in_nanos) * 100
-              : 0);
-          return renderHierarchyNode(child, childNodeId, depth + 1, childPercentage);
-        })}
+        {hasChildren &&
+          isExpanded &&
+          node.children.map((child: any, index: number) => {
+            const childNodeId = `${nodeId}-${index}`;
+            const childPercentage =
+              child.percentage ||
+              (child.time_in_nanos && query?.time_in_nanos
+                ? (child.time_in_nanos / query.time_in_nanos) * 100
+                : 0);
+            return renderHierarchyNode(child, childNodeId, depth + 1, childPercentage);
+          })}
       </div>
     );
   };
@@ -236,7 +253,9 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
         <EuiFlexItem>
           <EuiTitle size="m">
-            <h2 style={{ fontWeight: 600, fontSize: '22px' }}>{query.type || query.queryName || 'Query'}</h2>
+            <h2 style={{ fontWeight: 600, fontSize: '22px' }}>
+              {query.type || query.queryName || 'Query'}
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -254,7 +273,11 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
       {query.description && (
         <>
           <EuiSpacer size="xs" />
-          <EuiText size="xs" color="subdued" style={{ fontFamily: 'monospace', lineHeight: '1.5', fontSize: '12px' }}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            style={{ fontFamily: 'monospace', lineHeight: '1.5', fontSize: '12px' }}
+          >
             {query.description}
           </EuiText>
         </>
@@ -265,18 +288,22 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
       {/* Query Hierarchy Section */}
       <div style={{ marginBottom: '24px' }}>
         <EuiTitle size="s">
-          <h3 style={{ fontWeight: 600, fontSize: '16px', marginBottom: '8px' }}>Query Hierarchy</h3>
+          <h3 style={{ fontWeight: 600, fontSize: '16px', marginBottom: '8px' }}>
+            Query Hierarchy
+          </h3>
         </EuiTitle>
         <EuiText size="xs" color="subdued" style={{ marginBottom: '16px' }}>
           The hierarchical structure of the query and its subqueries.
         </EuiText>
 
-        <div style={{
-          backgroundColor: '#F7F8FA',
-          padding: '12px 16px',
-          borderRadius: '6px',
-          border: '1px solid #D3DAE6'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#F7F8FA',
+            padding: '12px 16px',
+            borderRadius: '6px',
+            border: '1px solid #D3DAE6',
+          }}
+        >
           {/* Render the current query using unified function */}
           {renderHierarchyNode(query, 'root', 0, 100)}
         </div>
@@ -288,7 +315,9 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
-                <h3 style={{ fontWeight: 600, fontSize: '16px' }}>Operation Breakdown: {query.type || 'Query'}</h3>
+                <h3 style={{ fontWeight: 600, fontSize: '16px' }}>
+                  Operation Breakdown: {query.type || 'Query'}
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -316,11 +345,7 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
           <EuiSpacer size="m" />
 
           {showVisualBreakdown ? (
-            <EuiBasicTable
-              items={breakdownEntries}
-              columns={columns}
-              tableLayout="auto"
-            />
+            <EuiBasicTable items={breakdownEntries} columns={columns} tableLayout="auto" />
           ) : (
             <EuiBasicTable
               items={allBreakdownEntries}
@@ -353,4 +378,4 @@ export const QueryDetailPanel: React.FC<QueryDetailProps> = ({
       )}
     </div>
   );
-}
+};

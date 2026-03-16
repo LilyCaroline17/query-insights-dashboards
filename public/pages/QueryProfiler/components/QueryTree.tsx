@@ -63,7 +63,7 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
 
     // Calculate total time including rewrite and collectors for search tab
     let totalTime = activeData.reduce((sum, q) => sum + (q.time_in_nanos || 0), 0);
-    
+
     if (activeTab === 'search') {
       if (rewriteTime !== undefined && rewriteTime > 0) {
         totalTime += rewriteTime;
@@ -74,7 +74,11 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
       }
     }
 
-    const transformQuery = (query: QueryProfile | AggregationProfile, index: number, parentPath = ''): ProcessedQuery => {
+    const transformQuery = (
+      query: QueryProfile | AggregationProfile,
+      index: number,
+      parentPath = ''
+    ): ProcessedQuery => {
       const nodeId = parentPath ? `${parentPath}-${index}` : `${index}`;
       const timeMs = (query.time_in_nanos || 0) / 1000000;
       const percentage = totalTime > 0 ? ((query.time_in_nanos || 0) / totalTime) * 100 : 0;
@@ -116,7 +120,11 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
 
       // Add collector nodes if collectors exist
       if (collectors && collectors.length > 0) {
-        const transformCollector = (collector: any, index: number, parentPath = ''): ProcessedQuery => {
+        const transformCollector = (
+          collector: any,
+          index: number,
+          parentPath = ''
+        ): ProcessedQuery => {
           const nodeId = parentPath ? `${parentPath}-${index}` : `collector-${index}`;
           const timeMs = (collector.time_in_nanos || 0) / 1000000;
           const percentage = totalTime > 0 ? ((collector.time_in_nanos || 0) / totalTime) * 100 : 0;
@@ -124,14 +132,16 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
           return {
             id: nodeId,
             queryName: collector.name || 'Collector',
-            type: collector.name || 'Collector',  // Use actual collector name instead of hardcoded 'Collectors'
+            type: collector.name || 'Collector', // Use actual collector name instead of hardcoded 'Collectors'
             description: collector.reason || '',
             time_ms: timeMs,
             time_in_nanos: collector.time_in_nanos || 0,
             percentage,
-            breakdown: collector.breakdown || {},  // Include breakdown if it exists
-            rawBreakdown: collector.breakdown || {},  // Include breakdown if it exists
-            children: collector.children?.map((child: any, idx: number) => transformCollector(child, idx, nodeId)),
+            breakdown: collector.breakdown || {}, // Include breakdown if it exists
+            rawBreakdown: collector.breakdown || {}, // Include breakdown if it exists
+            children: collector.children?.map((child: any, idx: number) =>
+              transformCollector(child, idx, nodeId)
+            ),
           };
         };
 
@@ -161,10 +171,10 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
       MatchAllDocsQuery: '#FFF9C4',
       Rewrite: '#C8E6C9',
     };
-    
+
     // Collector types get pink shades
     if (type.includes('Collector')) return '#F2959B';
-    
+
     return colors[type] || '#E0E7EF';
   };
 
@@ -248,9 +258,7 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
         </div>
 
         {hasChildren && isExpanded && (
-          <div>
-            {node.children!.map((child) => renderTreeNode(child, depth + 1))}
-          </div>
+          <div>{node.children!.map((child) => renderTreeNode(child, depth + 1))}</div>
         )}
       </div>
     );
@@ -303,7 +311,9 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
   }
 
   return (
-    <div style={{ display: 'flex', height: '600px', border: '1px solid #D3DAE6', borderRadius: '6px' }}>
+    <div
+      style={{ display: 'flex', height: '600px', border: '1px solid #D3DAE6', borderRadius: '6px' }}
+    >
       {/* Left Panel - Tree View */}
       <div
         style={{
@@ -319,10 +329,7 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
         {/* Tabs */}
         <div style={{ borderBottom: '1px solid #D3DAE6', padding: '8px 12px' }}>
           <EuiTabs size="s">
-            <EuiTab
-              isSelected={activeTab === 'search'}
-              onClick={() => setActiveTab('search')}
-            >
+            <EuiTab isSelected={activeTab === 'search'} onClick={() => setActiveTab('search')}>
               Search
             </EuiTab>
             <EuiTab
@@ -353,12 +360,12 @@ export const QueryTree: React.FC<QueryTreeProps> = ({
 
       {/* Right Panel - Query Detail */}
       <div style={{ flex: 1, overflowY: 'auto', backgroundColor: 'white' }}>
-        <QueryDetailPanel 
-          query={selectedQuery} 
+        <QueryDetailPanel
+          query={selectedQuery}
           redThreshold={redThreshold}
           orangeThreshold={orangeThreshold}
         />
       </div>
     </div>
   );
-}
+};

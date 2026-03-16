@@ -55,14 +55,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.hasError) {
       return (
         <div style={{ padding: '20px' }}>
-          <EuiCallOut
-            title="Something went wrong"
-            color="danger"
-            iconType="alert"
-          >
+          <EuiCallOut title="Something went wrong" color="danger" iconType="alert">
             <p>
-              The Query Profiler encountered an unexpected error. Please try refreshing the page
-              or contact support if the problem persists.
+              The Query Profiler encountered an unexpected error. Please try refreshing the page or
+              contact support if the problem persists.
             </p>
             {this.state.error && (
               <>

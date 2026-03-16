@@ -4,12 +4,7 @@
  */
 
 import React from 'react';
-import {
-  EuiTextArea,
-  EuiText,
-  EuiButton,
-  EuiRadio,
-} from '@elastic/eui';
+import { EuiTextArea, EuiText, EuiButton, EuiRadio } from '@elastic/eui';
 
 export type InputMode = 'enterQuery' | 'addJson';
 
@@ -63,17 +58,17 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
       const cursorPos = textarea.selectionStart;
       const textBeforeCursor = jsonInput.substring(0, cursorPos);
       const textAfterCursor = jsonInput.substring(cursorPos);
-      
+
       // Calculate indentation based on bracket nesting (default 2 spaces)
       const openBrackets = (textBeforeCursor.match(/[{[]/g) || []).length;
       const closeBrackets = (textBeforeCursor.match(/[}\]]/g) || []).length;
       const indentLevel = Math.max(0, openBrackets - closeBrackets);
       const indent = ' '.repeat(indentLevel * 2);
-      
+
       e.preventDefault();
       const newValue = textBeforeCursor + '\n' + indent + textAfterCursor;
       onJsonChange(newValue);
-      
+
       setTimeout(() => {
         textarea.selectionStart = textarea.selectionEnd = cursorPos + 1 + indent.length;
       }, 0);
@@ -106,7 +101,9 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Mode selection */}
-      <div style={{ padding: '16px', borderBottom: '1px solid #D3DAE6', display: 'flex', gap: '24px' }}>
+      <div
+        style={{ padding: '16px', borderBottom: '1px solid #D3DAE6', display: 'flex', gap: '24px' }}
+      >
         <EuiRadio
           id="enterQuery"
           label="Enter Query"
@@ -127,13 +124,15 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
         // Dual editor mode
         <div style={{ display: 'flex', flex: 1, minHeight: '400px' }}>
           {/* Query editor */}
-          <div style={{ 
-            flex: 1,
-            borderRight: '1px solid #D3DAE6',
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: 'white',
-          }}>
+          <div
+            style={{
+              flex: 1,
+              borderRight: '1px solid #D3DAE6',
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: 'white',
+            }}
+          >
             <div style={HEADER_STYLE}>
               <EuiText size="s" style={{ fontWeight: 600, color: '#343741' }}>
                 Enter query
@@ -143,25 +142,29 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
           </div>
 
           {/* JSON editor */}
-          <div style={{ 
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: 'white',
-          }}>
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: 'white',
+            }}
+          >
             <div style={HEADER_STYLE} />
             {renderEditor(jsonInput, onJsonChange, '', handleJsonKeyDown)}
           </div>
         </div>
       ) : (
         // JSON-only mode
-        <div style={{ 
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: 'white',
-          minHeight: '400px',
-        }}>
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: 'white',
+            minHeight: '400px',
+          }}
+        >
           <div style={HEADER_STYLE}>
             <EuiText size="s" style={{ fontWeight: 600, color: '#343741' }}>
               Enter JSON
@@ -170,7 +173,12 @@ export const QueryEditor: React.FC<QueryEditorProps> = ({
               Import JSON
             </EuiButton>
           </div>
-          {renderEditor(jsonInput, onJsonChange, 'Paste profile JSON here or use Import JSON button...', handleJsonKeyDown)}
+          {renderEditor(
+            jsonInput,
+            onJsonChange,
+            'Paste profile JSON here or use Import JSON button...',
+            handleJsonKeyDown
+          )}
         </div>
       )}
     </div>

@@ -8,25 +8,25 @@
  */
 export const PROFILER_COLORS = {
   // Threshold colors for performance indicators
-  RED: '#F66',           // High usage (>80% by default)
-  ORANGE: '#FDB462',     // Medium usage (50-80% by default)
-  GREEN: '#90EE90',      // Low usage (<50% by default)
-  
+  RED: '#F66', // High usage (>80% by default)
+  ORANGE: '#FDB462', // Medium usage (50-80% by default)
+  GREEN: '#90EE90', // Low usage (<50% by default)
+
   // Background colors
-  BAR_BACKGROUND: '#F5F7FA',  // Background for progress bars
-  
+  BAR_BACKGROUND: '#F5F7FA', // Background for progress bars
+
   // Text colors
-  SUBDUED_TEXT: '#69707D',    // Subdued text color
-  HEADER_TEXT: '#98A2B3',     // Header text color
-  PRIMARY_TEXT: '#343741',    // Primary text color
+  SUBDUED_TEXT: '#69707D', // Subdued text color
+  HEADER_TEXT: '#98A2B3', // Header text color
+  PRIMARY_TEXT: '#343741', // Primary text color
 } as const;
 
 /**
  * Default threshold values (as percentages)
  */
 export const DEFAULT_THRESHOLDS = {
-  RED: 80,      // Red threshold: >80%
-  ORANGE: 50,   // Orange threshold: >50%
+  RED: 80, // Red threshold: >80%
+  ORANGE: 50, // Orange threshold: >50%
 } as const;
 
 /**
@@ -37,7 +37,7 @@ export const LAYOUT_CONSTANTS = {
   TREE_PANEL_DEFAULT_WIDTH: 320,
   TREE_PANEL_MIN_WIDTH: 180,
   TREE_PANEL_MAX_WIDTH: 600,
-  
+
   // Tree node indentation
   TREE_NODE_INDENT: 12,
   TREE_HIERARCHY_INDENT: 20,

@@ -72,11 +72,7 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({
           </EuiFormRow>
 
           <EuiFormRow label="JSON formatting">
-            <EuiButton
-              size="s"
-              onClick={handlePrettifyJSON}
-              fullWidth
-            >
+            <EuiButton size="s" onClick={handlePrettifyJSON} fullWidth>
               Prettify JSON
             </EuiButton>
           </EuiFormRow>

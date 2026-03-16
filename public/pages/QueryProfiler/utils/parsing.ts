@@ -73,16 +73,12 @@ export const readFileAsText = (file: File): Promise<string> => {
       if (event.target?.result) {
         resolve(event.target.result as string);
       } else {
-        reject(
-          new Error('Failed to read file: No result from FileReader')
-        );
+        reject(new Error('Failed to read file: No result from FileReader'));
       }
     };
 
     reader.onerror = () => {
-      reject(
-        new Error(`Failed to read file: ${reader.error?.message || 'Unknown error'}`)
-      );
+      reject(new Error(`Failed to read file: ${reader.error?.message || 'Unknown error'}`));
     };
 
     reader.readAsText(file);
