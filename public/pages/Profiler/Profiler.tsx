@@ -34,6 +34,7 @@ import {
   EuiSmallButton,
   EuiCompressedFieldNumber,
   EuiCompressedSwitch,
+  EuiPanel,
 } from '@elastic/eui';
 import { createRoot } from 'react-dom/client';
 import ace from 'brace';
@@ -45,6 +46,10 @@ import { getDataSourceFromUrl } from '../../utils/datasource-utils';
 import { OpenSearchDashboardsContextProvider } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import 'brace/mode/json';
 import 'brace/theme/textmate';
+import { ShardTable } from '../QueryProfiler/components/ShardTable';
+import { QueryTree } from '../QueryProfiler/components/QueryTree';
+import { ProfileData, QueryProfile } from '../QueryProfiler/types';
+import { DEFAULT_THRESHOLDS } from '../QueryProfiler/constants';
 
 const ImportFlyout: React.FC<{
   onClose: () => void;
@@ -186,6 +191,13 @@ export const ProfilerEditor: React.FC<{
   const [wrapMode, setWrapMode] = useState(false);
   const [hideInput, setHideInput] = useState(false);
 
+  // Profile visualization state
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [selectedShardIndex, setSelectedShardIndex] = useState<number>(0);
+  const [selectedQuery, setSelectedQuery] = useState<QueryProfile | null>(null);
+  const [redThreshold, setRedThreshold] = useState(DEFAULT_THRESHOLDS.RED);
+  const [orangeThreshold, setOrangeThreshold] = useState(DEFAULT_THRESHOLDS.ORANGE);
+
   const inputEditorRef = useRef<HTMLDivElement>(null);
   const outputEditorRef = useRef<HTMLDivElement>(null);
   const inputEditorInstance = useRef<ReturnType<typeof ace.edit> | null>(null);
@@ -274,10 +286,26 @@ export const ProfilerEditor: React.FC<{
           dataSourceId: dataSourceIdRef.current,
         }),
       });
-      setOutput(typeof response === 'string' ? response : JSON.stringify(response, null, 2));
+      const outputStr = typeof response === 'string' ? response : JSON.stringify(response, null, 2);
+      setOutput(outputStr);
+
+      // Parse profile data for visualization
+      try {
+        const parsed = typeof response === 'string' ? JSON.parse(response) : response;
+        if (parsed.profile?.shards) {
+          setProfileData({ profile: parsed.profile });
+          setSelectedShardIndex(0);
+          setSelectedQuery(null);
+        } else {
+          setProfileData(null);
+        }
+      } catch {
+        setProfileData(null);
+      }
     } catch (error) {
       const err = error as { body?: { message?: string }; message?: string };
       setOutput(`Error: ${err.body?.message || err.message || JSON.stringify(error, null, 2)}`);
+      setProfileData(null);
     }
   };
 
@@ -370,6 +398,8 @@ export const ProfilerEditor: React.FC<{
                         -1
                       );
                       setOutput('');
+                      setProfileData(null);
+                      setSelectedQuery(null);
                     }}
                     className="conApp__editorActionButton conApp__editorActionButton--success"
                     style={{ padding: '0 8px', cursor: 'pointer', lineHeight: 'inherit' }}
@@ -496,6 +526,45 @@ export const ProfilerEditor: React.FC<{
             </EuiText>
           </EuiFlyoutBody>
         </EuiFlyout>
+      )}
+
+      {/* Profile Visualization */}
+      {profileData?.profile?.shards && profileData.profile.shards.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiPanel paddingSize="l">
+            <EuiTitle size="s">
+              <h3>Profile Results</h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+
+            <ShardTable
+              shards={profileData.profile.shards}
+              onShardSelect={setSelectedShardIndex}
+              redThreshold={redThreshold}
+              orangeThreshold={orangeThreshold}
+              onRedThresholdChange={setRedThreshold}
+              onOrangeThresholdChange={setOrangeThreshold}
+            />
+
+            <EuiSpacer size="l" />
+
+            {profileData.profile.shards[selectedShardIndex]?.searches?.[0] && (
+              <QueryTree
+                queries={profileData.profile.shards[selectedShardIndex].searches[0].query}
+                aggregations={profileData.profile.shards[selectedShardIndex].aggregations}
+                selectedQuery={selectedQuery}
+                onQuerySelect={setSelectedQuery}
+                rewriteTime={
+                  profileData.profile.shards[selectedShardIndex].searches[0].rewrite_time
+                }
+                collectors={profileData.profile.shards[selectedShardIndex].searches[0].collector}
+                redThreshold={redThreshold}
+                orangeThreshold={orangeThreshold}
+              />
+            )}
+          </EuiPanel>
+        </>
       )}
     </div>
   );

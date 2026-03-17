@@ -968,8 +968,9 @@ const QueryInsights = ({
         formatter: (tooltipParams: any) => {
           const [timeIdx, indexIdx, , formatted] = tooltipParams.data;
           const indexName = heatmapChartData.indices[indexIdx];
-          const time = heatmapChartData.times[timeIdx];
-          return `${indexName}<br/>${time}<br/>${formatted}`;
+          const startTime = heatmapChartData.times[timeIdx];
+          const endTime = heatmapChartData.times[timeIdx + 1] || 'now';
+          return `${indexName}<br/>${startTime} - ${endTime}<br/>${formatted}`;
         },
       },
       grid: { left: 100, right: 60, top: 30, bottom: 130 },
